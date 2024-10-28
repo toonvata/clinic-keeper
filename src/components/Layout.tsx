@@ -6,7 +6,11 @@ import Dashboard from "@/components/Dashboard";
 const Layout = () => {
   return (
     <div className="container mx-auto p-4 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-center">คลินิกระบบบริหารจัดการ</h1>
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
+        <p className="text-gray-600 mt-2">เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก</p>
+        <p className="text-gray-600">162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
+      </div>
       
       <Tabs defaultValue="patients" className="w-full">
         <TabsList className="grid w-full grid-cols-3">

@@ -10,6 +10,8 @@ import { Patient } from "@/types";
 const PatientRecords = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<Patient>>({});
+  const [hn, setHn] = useState<string>("");
+  const [registrationDate, setRegistrationDate] = useState<Date>(new Date());
 
   const generateHN = () => {
     const date = new Date();
@@ -33,10 +35,11 @@ const PatientRecords = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const hn = generateHN();
+    const newHn = generateHN();
+    setHn(newHn);
     const newPatient: Patient = {
       ...formData as Patient,
-      hn,
+      hn: newHn,
       registrationDate: new Date(),
       age: calculateAge(new Date(formData.birthDate!))
     };
@@ -46,13 +49,28 @@ const PatientRecords = () => {
     
     toast({
       title: "บันทึกข้อมูลสำเร็จ",
-      description: `HN: ${hn}`,
+      description: `HN: ${newHn}`,
     });
   };
 
   return (
     <Card>
       <CardContent className="pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="space-y-2">
+            <Label>HN</Label>
+            <Input value={hn || "-"} disabled />
+          </div>
+          <div className="space-y-2">
+            <Label>วันที่มารักษา</Label>
+            <Input 
+              type="text" 
+              value={registrationDate.toLocaleDateString('th-TH')} 
+              disabled 
+            />
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
