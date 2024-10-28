@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientRecords from "@/components/PatientRecords";
 import TreatmentRecords from "@/components/TreatmentRecords";
 import Dashboard from "@/components/Dashboard";
+import PatientList from "@/components/PatientList";
 
 const Layout = () => {
   return (
@@ -13,14 +14,19 @@ const Layout = () => {
       </div>
       
       <Tabs defaultValue="patients" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="patients">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
+          <TabsTrigger value="patient-list">รายชื่อผู้ป่วย</TabsTrigger>
           <TabsTrigger value="treatments">บันทึกการรักษา</TabsTrigger>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
         </TabsList>
         
         <TabsContent value="patients">
           <PatientRecords />
+        </TabsContent>
+
+        <TabsContent value="patient-list">
+          <PatientList />
         </TabsContent>
         
         <TabsContent value="treatments">
