@@ -6,6 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
+import { db } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
 
 const PatientRecords = () => {
   const { toast } = useToast();
@@ -33,24 +35,33 @@ const PatientRecords = () => {
     return age;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newHn = generateHN();
     setHn(newHn);
+    
     const newPatient: Patient = {
       ...formData as Patient,
       hn: newHn,
       registrationDate: new Date(),
       age: calculateAge(new Date(formData.birthDate!))
     };
-    
-    // Here you would typically save to a database
-    console.log(newPatient);
-    
-    toast({
-      title: "บันทึกข้อมูลสำเร็จ",
-      description: `HN: ${newHn}`,
-    });
+
+    try {
+      // บันทึกข้อมูลลง Firebase
+      await addDoc(collection(db, "patients"), newPatient);
+      
+      toast({
+        title: "บันทึกข้อมูลสำเร็จ",
+        description: `HN: ${newHn}`,
+      });
+    } catch (error) {
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
