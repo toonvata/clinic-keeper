@@ -60,6 +60,13 @@ const PatientList = () => {
     }
   };
 
+  const handleTreatment = (hn: string) => {
+    toast({
+      title: "Coming soon",
+      description: "ฟีเจอร์นี้กำลังอยู่ในระหว่างการพัฒนา",
+    });
+  };
+
   return (
     <Card>
       <CardContent className="pt-6">
