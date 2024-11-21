@@ -14,10 +14,14 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
 
-const PatientList = () => {
+interface PatientListProps {
+  patients: Patient[];
+  onDeletePatient: (hn: string) => void;
+}
+
+const PatientList = ({ patients, onDeletePatient }: PatientListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [patients, setPatients] = useState<Patient[]>([]);
 
   const filteredPatients = patients.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
@@ -29,7 +33,7 @@ const PatientList = () => {
   });
 
   const handleDelete = (hn: string) => {
-    setPatients(patients.filter(p => p.hn !== hn));
+    onDeletePatient(hn);
     toast({
       title: "ลบข้อมูลสำเร็จ",
       description: `ลบข้อมูลผู้ป่วย HN: ${hn} เรียบร้อยแล้ว`,

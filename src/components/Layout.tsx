@@ -1,10 +1,22 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PatientRecords from "@/components/PatientRecords";
 import TreatmentRecords from "@/components/TreatmentRecords";
 import Dashboard from "@/components/Dashboard";
 import PatientList from "@/components/PatientList";
+import { Patient } from "@/types";
 
 const Layout = () => {
+  const [patients, setPatients] = useState<Patient[]>([]);
+
+  const handleAddPatient = (newPatient: Patient) => {
+    setPatients([...patients, newPatient]);
+  };
+
+  const handleDeletePatient = (hn: string) => {
+    setPatients(patients.filter(p => p.hn !== hn));
+  };
+
   return (
     <div className="container mx-auto p-4 min-h-screen">
       <div className="text-center mb-6">
@@ -22,11 +34,11 @@ const Layout = () => {
         </TabsList>
         
         <TabsContent value="patients">
-          <PatientRecords />
+          <PatientRecords onAddPatient={handleAddPatient} />
         </TabsContent>
 
         <TabsContent value="patient-list">
-          <PatientList />
+          <PatientList patients={patients} onDeletePatient={handleDeletePatient} />
         </TabsContent>
         
         <TabsContent value="treatments">

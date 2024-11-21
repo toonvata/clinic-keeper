@@ -7,7 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
 
-const PatientRecords = () => {
+interface PatientRecordsProps {
+  onAddPatient: (patient: Patient) => void;
+}
+
+const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<Patient>>({});
   const [hn, setHn] = useState<string>("");
@@ -45,7 +49,8 @@ const PatientRecords = () => {
       age: calculateAge(new Date(formData.birthDate!))
     };
 
-    // Here we would typically save to a database
+    onAddPatient(newPatient);
+    
     toast({
       title: "บันทึกข้อมูลสำเร็จ",
       description: `HN: ${newHn}`,
