@@ -79,7 +79,7 @@ const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps)
               <TableHead>อาการ</TableHead>
               <TableHead>การวินิจฉัย</TableHead>
               <TableHead>การรักษา</TableHead>
-              <TableHead>นัดครั้งถัดไป</TableHead>
+              <TableHead>ยาที่ใช้</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -92,11 +92,7 @@ const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps)
                 <TableCell>{treatment.symptoms}</TableCell>
                 <TableCell>{treatment.diagnosis}</TableCell>
                 <TableCell>{treatment.treatment}</TableCell>
-                <TableCell>
-                  {treatment.nextAppointment 
-                    ? treatment.nextAppointment.toLocaleDateString('th-TH')
-                    : '-'}
-                </TableCell>
+                <TableCell>{treatment.medications}</TableCell>
               </TableRow>
             ))}
           </TableBody>
