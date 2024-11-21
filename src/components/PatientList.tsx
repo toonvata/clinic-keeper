@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,27 +13,11 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
-import { db } from "@/lib/firebase";
-import { collection, query, onSnapshot, deleteDoc, doc } from "firebase/firestore";
 
 const PatientList = () => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [patients, setPatients] = useState<Patient[]>([]);
-
-  useEffect(() => {
-    // ดึงข้อมูลแบบ Real-time จาก Firebase
-    const q = query(collection(db, "patients"));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const patientsData: Patient[] = [];
-      querySnapshot.forEach((doc) => {
-        patientsData.push({ id: doc.id, ...doc.data() } as Patient);
-      });
-      setPatients(patientsData);
-    });
-
-    return () => unsubscribe();
-  }, []);
 
   const filteredPatients = patients.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
@@ -44,20 +28,12 @@ const PatientList = () => {
     );
   });
 
-  const handleDelete = async (id: string, hn: string) => {
-    try {
-      await deleteDoc(doc(db, "patients", id));
-      toast({
-        title: "ลบข้อมูลสำเร็จ",
-        description: `ลบข้อมูลผู้ป่วย HN: ${hn} เรียบร้อยแล้ว`,
-      });
-    } catch (error) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถลบข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
-        variant: "destructive",
-      });
-    }
+  const handleDelete = (hn: string) => {
+    setPatients(patients.filter(p => p.hn !== hn));
+    toast({
+      title: "ลบข้อมูลสำเร็จ",
+      description: `ลบข้อมูลผู้ป่วย HN: ${hn} เรียบร้อยแล้ว`,
+    });
   };
 
   const handleTreatment = (hn: string) => {
@@ -108,7 +84,7 @@ const PatientList = () => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(patient.id!, patient.hn)}
+                    onClick={() => handleDelete(patient.hn)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
