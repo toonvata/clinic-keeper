@@ -29,10 +29,26 @@ const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps)
   });
 
   const handleNewTreatment = () => {
-    // Will implement new treatment form later
+    const newTreatment: Treatment = {
+      id: `TR${Date.now()}`,
+      patientHN: "TEST001", // This would normally come from a form
+      treatmentDate: new Date(),
+      vitalSigns: {
+        bloodPressure: "120/80",
+        heartRate: 80,
+        temperature: 37,
+        respiratoryRate: 16
+      },
+      symptoms: "ตัวอย่างอาการ",
+      diagnosis: "ตัวอย่างการวินิจฉัย",
+      treatment: "ตัวอย่างการรักษา",
+      medications: "ตัวอย่างยาที่ใช้"
+    };
+
+    onAddTreatment(newTreatment);
     toast({
-      title: "Coming soon",
-      description: "This feature will be implemented soon",
+      title: "บันทึกข้อมูลสำเร็จ",
+      description: "บันทึกข้อมูลการรักษาเรียบร้อยแล้ว",
     });
   };
 
