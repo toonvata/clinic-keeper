@@ -4,10 +4,11 @@ import PatientRecords from "@/components/PatientRecords";
 import TreatmentRecords from "@/components/TreatmentRecords";
 import Dashboard from "@/components/Dashboard";
 import PatientList from "@/components/PatientList";
-import { Patient } from "@/types";
+import { Patient, Treatment } from "@/types";
 
 const Layout = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
 
   const handleAddPatient = (newPatient: Patient) => {
     setPatients([...patients, newPatient]);
@@ -15,6 +16,10 @@ const Layout = () => {
 
   const handleDeletePatient = (hn: string) => {
     setPatients(patients.filter(p => p.hn !== hn));
+  };
+
+  const handleAddTreatment = (newTreatment: Treatment) => {
+    setTreatments([...treatments, newTreatment]);
   };
 
   return (
@@ -42,11 +47,11 @@ const Layout = () => {
         </TabsContent>
         
         <TabsContent value="treatments">
-          <TreatmentRecords />
+          <TreatmentRecords treatments={treatments} onAddTreatment={handleAddTreatment} />
         </TabsContent>
         
         <TabsContent value="dashboard">
-          <Dashboard />
+          <Dashboard patients={patients} treatments={treatments} />
         </TabsContent>
       </Tabs>
     </div>

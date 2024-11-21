@@ -1,6 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Patient, Treatment } from "@/types";
 
-const Dashboard = () => {
+interface DashboardProps {
+  patients: Patient[];
+  treatments: Treatment[];
+}
+
+const Dashboard = ({ patients, treatments }: DashboardProps) => {
   return (
     <div className="grid gap-4">
       <Card>
@@ -8,7 +14,16 @@ const Dashboard = () => {
           <CardTitle>สถิติผู้มารับบริการ</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* We'll add charts here later */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-lg font-semibold">จำนวนผู้ป่วยทั้งหมด</h3>
+              <p className="text-3xl font-bold">{patients.length}</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold">จำนวนการรักษาทั้งหมด</h3>
+              <p className="text-3xl font-bold">{treatments.length}</p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

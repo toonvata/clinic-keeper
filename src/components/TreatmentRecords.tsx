@@ -14,10 +14,14 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Treatment } from "@/types";
 
-const TreatmentRecords = () => {
+interface TreatmentRecordsProps {
+  treatments: Treatment[];
+  onAddTreatment: (treatment: Treatment) => void;
+}
+
+const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
-  const [treatments, setTreatments] = useState<Treatment[]>([]);
 
   const filteredTreatments = treatments.filter((treatment) => {
     const searchLower = searchTerm.toLowerCase();
