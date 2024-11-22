@@ -47,7 +47,11 @@ const Layout = () => {
         </TabsContent>
 
         <TabsContent value="patient-list">
-          <PatientList patients={patients} onDeletePatient={handleDeletePatient} />
+          <PatientList
+            patients={patients}
+            treatments={treatments}
+            onDeletePatient={handleDeletePatient}
+          />
         </TabsContent>
 
         <TabsContent value="treatments">

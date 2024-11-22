@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Trash2 } from "lucide-react";
+import { Search, History, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -12,16 +12,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { Patient } from "@/types";
+import { Patient, Treatment } from "@/types";
+import TreatmentHistoryDialog from "./TreatmentHistoryDialog";
 
 interface PatientListProps {
   patients: Patient[];
+  treatments: Treatment[];
   onDeletePatient: (hn: string) => void;
 }
 
-const PatientList = ({ patients, onDeletePatient }: PatientListProps) => {
+const PatientList = ({ patients, treatments, onDeletePatient }: PatientListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedPatient, setSelectedPatient] = useState<{
+    hn: string;
+    name: string;
+  } | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   const filteredPatients = patients.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
@@ -45,6 +52,18 @@ const PatientList = ({ patients, onDeletePatient }: PatientListProps) => {
       title: "Coming soon",
       description: "ฟีเจอร์นี้กำลังอยู่ในระหว่างการพัฒนา",
     });
+  };
+
+  const handleShowHistory = (patient: Patient) => {
+    setSelectedPatient({
+      hn: patient.hn,
+      name: `${patient.firstName} ${patient.lastName}`,
+    });
+    setShowHistory(true);
+  };
+
+  const getPatientTreatments = (hn: string) => {
+    return treatments.filter((treatment) => treatment.patientHN === hn);
   };
 
   return (
@@ -86,6 +105,14 @@ const PatientList = ({ patients, onDeletePatient }: PatientListProps) => {
                     บันทึกการรักษา
                   </Button>
                   <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleShowHistory(patient)}
+                  >
+                    <History className="h-4 w-4 mr-1" />
+                    ประวัติการรักษา
+                  </Button>
+                  <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(patient.hn)}
@@ -97,6 +124,15 @@ const PatientList = ({ patients, onDeletePatient }: PatientListProps) => {
             ))}
           </TableBody>
         </Table>
+
+        {selectedPatient && (
+          <TreatmentHistoryDialog
+            isOpen={showHistory}
+            onClose={() => setShowHistory(false)}
+            treatments={getPatientTreatments(selectedPatient.hn)}
+            patientName={selectedPatient.name}
+          />
+        )}
       </CardContent>
     </Card>
   );
