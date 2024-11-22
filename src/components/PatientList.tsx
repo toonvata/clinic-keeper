@@ -19,9 +19,15 @@ interface PatientListProps {
   patients: Patient[];
   treatments: Treatment[];
   onDeletePatient: (hn: string) => void;
+  onTreatmentClick: (patient: Patient) => void;
 }
 
-const PatientList = ({ patients, treatments, onDeletePatient }: PatientListProps) => {
+const PatientList = ({ 
+  patients, 
+  treatments, 
+  onDeletePatient,
+  onTreatmentClick 
+}: PatientListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPatient, setSelectedPatient] = useState<{
@@ -44,13 +50,6 @@ const PatientList = ({ patients, treatments, onDeletePatient }: PatientListProps
     toast({
       title: "ลบข้อมูลสำเร็จ",
       description: `ลบข้อมูลผู้ป่วย HN: ${hn} เรียบร้อยแล้ว`,
-    });
-  };
-
-  const handleTreatment = (hn: string) => {
-    toast({
-      title: "Coming soon",
-      description: "ฟีเจอร์นี้กำลังอยู่ในระหว่างการพัฒนา",
     });
   };
 
@@ -100,7 +99,7 @@ const PatientList = ({ patients, treatments, onDeletePatient }: PatientListProps
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleTreatment(patient.hn)}
+                    onClick={() => onTreatmentClick(patient)}
                   >
                     บันทึกการรักษา
                   </Button>

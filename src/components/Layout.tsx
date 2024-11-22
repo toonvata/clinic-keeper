@@ -9,6 +9,7 @@ import { Patient, Treatment } from "@/types";
 const Layout = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
+  const [activeTab, setActiveTab] = useState("patients");
 
   const handleAddPatient = (newPatient: Patient) => {
     setPatients([...patients, newPatient]);
@@ -20,6 +21,10 @@ const Layout = () => {
 
   const handleAddTreatment = (newTreatment: Treatment) => {
     setTreatments([...treatments, newTreatment]);
+  };
+
+  const handleTreatmentClick = (patient: Patient) => {
+    setActiveTab("treatments");
   };
 
   return (
@@ -34,7 +39,7 @@ const Layout = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="patients" className="w-full">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="patients">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
           <TabsTrigger value="patient-list">รายชื่อผู้ป่วย</TabsTrigger>
@@ -51,6 +56,7 @@ const Layout = () => {
             patients={patients}
             treatments={treatments}
             onDeletePatient={handleDeletePatient}
+            onTreatmentClick={handleTreatmentClick}
           />
         </TabsContent>
 
