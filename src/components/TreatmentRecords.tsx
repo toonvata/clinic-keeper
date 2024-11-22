@@ -2,15 +2,8 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, PlusCircle } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Treatment } from "@/types";
 
@@ -21,82 +14,151 @@ interface TreatmentRecordsProps {
 
 const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps) => {
   const { toast } = useToast();
-  const [searchTerm, setSearchTerm] = useState("");
-
-  const filteredTreatments = treatments.filter((treatment) => {
-    const searchLower = searchTerm.toLowerCase();
-    return treatment.patientHN.toLowerCase().includes(searchLower);
+  const [formData, setFormData] = useState({
+    patientHN: "",
+    treatmentDate: new Date(),
+    vitalSigns: {
+      bloodPressure: "",
+      heartRate: 0,
+      temperature: 0,
+      respiratoryRate: 0
+    },
+    symptoms: "",
+    diagnosis: "",
+    treatment: "",
+    medications: ""
   });
 
-  const handleNewTreatment = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
     const newTreatment: Treatment = {
       id: `TR${Date.now()}`,
-      patientHN: "TEST001", // This would normally come from a form
-      treatmentDate: new Date(),
-      vitalSigns: {
-        bloodPressure: "120/80",
-        heartRate: 80,
-        temperature: 37,
-        respiratoryRate: 16
-      },
-      symptoms: "ตัวอย่างอาการ",
-      diagnosis: "ตัวอย่างการวินิจฉัย",
-      treatment: "ตัวอย่างการรักษา",
-      medications: "ตัวอย่างยาที่ใช้"
+      ...formData,
+      treatmentDate: new Date(formData.treatmentDate)
     };
 
     onAddTreatment(newTreatment);
+    
     toast({
       title: "บันทึกข้อมูลสำเร็จ",
-      description: "บันทึกข้อมูลการรักษาเรียบร้อยแล้ว",
+      description: `บันทึกการรักษาสำหรับ HN: ${formData.patientHN}`,
     });
   };
 
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="relative flex-1 mr-4">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="ค้นหาด้วย HN..."
-              className="pl-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="patientHN">ค้นหาผู้ป่วย (เลือกรหัส HN)</Label>
+              <Input
+                id="patientHN"
+                required
+                onChange={(e) => setFormData({ ...formData, patientHN: e.target.value })}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="treatmentDate">วันที่รักษา</Label>
+              <Input
+                id="treatmentDate"
+                type="date"
+                required
+                onChange={(e) => setFormData({ ...formData, treatmentDate: new Date(e.target.value) })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Vital Signs</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div>
+                <Label htmlFor="bloodPressure">ความดันโลหิต</Label>
+                <Input
+                  id="bloodPressure"
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    vitalSigns: { ...formData.vitalSigns, bloodPressure: e.target.value }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="heartRate">ชีพจร</Label>
+                <Input
+                  id="heartRate"
+                  type="number"
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    vitalSigns: { ...formData.vitalSigns, heartRate: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="temperature">อุณหภูมิ</Label>
+                <Input
+                  id="temperature"
+                  type="number"
+                  step="0.1"
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    vitalSigns: { ...formData.vitalSigns, temperature: Number(e.target.value) }
+                  })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="respiratoryRate">อัตราการหายใจ</Label>
+                <Input
+                  id="respiratoryRate"
+                  type="number"
+                  onChange={(e) => setFormData({
+                    ...formData,
+                    vitalSigns: { ...formData.vitalSigns, respiratoryRate: Number(e.target.value) }
+                  })}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="symptoms">อาการ</Label>
+            <Textarea
+              id="symptoms"
+              required
+              onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
             />
           </div>
-          <Button onClick={handleNewTreatment}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            เพิ่มการรักษา
-          </Button>
-        </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>HN</TableHead>
-              <TableHead>วันที่รักษา</TableHead>
-              <TableHead>อาการ</TableHead>
-              <TableHead>การวินิจฉัย</TableHead>
-              <TableHead>การรักษา</TableHead>
-              <TableHead>ยาที่ใช้</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredTreatments.map((treatment) => (
-              <TableRow key={treatment.id}>
-                <TableCell>{treatment.patientHN}</TableCell>
-                <TableCell>
-                  {treatment.treatmentDate.toLocaleDateString('th-TH')}
-                </TableCell>
-                <TableCell>{treatment.symptoms}</TableCell>
-                <TableCell>{treatment.diagnosis}</TableCell>
-                <TableCell>{treatment.treatment}</TableCell>
-                <TableCell>{treatment.medications}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+          <div className="space-y-2">
+            <Label htmlFor="diagnosis">การวินิจฉัย</Label>
+            <Textarea
+              id="diagnosis"
+              required
+              onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="treatment">การรักษา</Label>
+            <Textarea
+              id="treatment"
+              required
+              onChange={(e) => setFormData({ ...formData, treatment: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="medications">ยาที่ใช้</Label>
+            <Textarea
+              id="medications"
+              required
+              onChange={(e) => setFormData({ ...formData, medications: e.target.value })}
+            />
+          </div>
+
+          <Button type="submit" className="w-full">บันทึกข้อมูล</Button>
+        </form>
       </CardContent>
     </Card>
   );
