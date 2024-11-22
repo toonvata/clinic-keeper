@@ -5,7 +5,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Treatment } from "@/types";
+import { Treatment, Patient } from "@/types";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Search } from "lucide-react";
 
 interface TreatmentRecordsProps {
   treatments: Treatment[];
@@ -14,6 +24,8 @@ interface TreatmentRecordsProps {
 
 const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps) => {
   const { toast } = useToast();
+  const [showSearch, setShowSearch] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [formData, setFormData] = useState({
     patientHN: "",
     treatmentDate: new Date(),
@@ -29,9 +41,51 @@ const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps)
     medications: ""
   });
 
+  // Dummy patient data for demonstration - replace with actual data source
+  const patients: Patient[] = [
+    {
+      hn: "66001",
+      firstName: "John",
+      lastName: "Doe",
+      age: 30,
+      underlyingDiseases: "Diabetes",
+      drugAllergies: "Penicillin",
+      registrationDate: new Date(),
+      birthDate: new Date(),
+      idNumber: "1234567890123",
+      occupation: "Engineer",
+      address: "123 Street",
+      phoneNumber: "0812345678"
+    },
+    // ... Add more dummy data as needed
+  ];
+
+  const handleSearch = (value: string) => {
+    const patient = patients.find(p => 
+      p.hn === value || 
+      p.firstName.toLowerCase().includes(value.toLowerCase()) ||
+      p.lastName.toLowerCase().includes(value.toLowerCase())
+    );
+    
+    if (patient) {
+      setSelectedPatient(patient);
+      setFormData(prev => ({ ...prev, patientHN: patient.hn }));
+      setShowSearch(false);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!selectedPatient) {
+      toast({
+        title: "กรุณาเลือกผู้ป่วย",
+        description: "โปรดค้นหาและเลือกผู้ป่วยก่อนบันทึกข้อมูล",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const newTreatment: Treatment = {
       id: `TR${Date.now()}`,
       ...formData,
@@ -50,26 +104,60 @@ const TreatmentRecords = ({ treatments, onAddTreatment }: TreatmentRecordsProps)
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="patientHN">ค้นหาผู้ป่วย (เลือกรหัส HN)</Label>
+          <div className="space-y-2">
+            <Label>ค้นหาผู้ป่วย (HN หรือชื่อ)</Label>
+            <div className="relative">
+              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                id="patientHN"
-                required
-                onChange={(e) => setFormData({ ...formData, patientHN: e.target.value })}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="treatmentDate">วันที่รักษา</Label>
-              <Input
-                id="treatmentDate"
-                type="date"
-                required
-                onChange={(e) => setFormData({ ...formData, treatmentDate: new Date(e.target.value) })}
+                placeholder="พิมพ์ HN หรือชื่อผู้ป่วย..."
+                className="pl-8"
+                onClick={() => setShowSearch(true)}
+                value={selectedPatient ? `${selectedPatient.hn} - ${selectedPatient.firstName} ${selectedPatient.lastName}` : ""}
+                readOnly
               />
             </div>
           </div>
+
+          {showSearch && (
+            <CommandDialog open={showSearch} onOpenChange={setShowSearch}>
+              <CommandInput placeholder="ค้นหาด้วย HN หรือชื่อ..." />
+              <CommandList>
+                <CommandEmpty>ไม่พบข้อมูลผู้ป่วย</CommandEmpty>
+                <CommandGroup heading="ผู้ป่วย">
+                  {patients.map((patient) => (
+                    <CommandItem
+                      key={patient.hn}
+                      onSelect={() => handleSearch(patient.hn)}
+                    >
+                      {patient.hn} - {patient.firstName} {patient.lastName}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </CommandDialog>
+          )}
+
+          {selectedPatient && (
+            <Card className="bg-muted p-4 mb-4">
+              <div className="space-y-2">
+                <h3 className="font-semibold">ข้อมูลผู้ป่วย</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="font-medium">ชื่อ-นามสกุล:</span> {selectedPatient.firstName} {selectedPatient.lastName}
+                  </div>
+                  <div>
+                    <span className="font-medium">อายุ:</span> {selectedPatient.age} ปี
+                  </div>
+                  <div>
+                    <span className="font-medium">โรคประจำตัว:</span> {selectedPatient.underlyingDiseases || "-"}
+                  </div>
+                  <div>
+                    <span className="font-medium">ประวัติแพ้ยา:</span> {selectedPatient.drugAllergies || "-"}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
 
           <div className="space-y-2">
             <Label>Vital Signs</Label>
