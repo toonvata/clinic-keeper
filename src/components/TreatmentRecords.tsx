@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
@@ -11,16 +11,18 @@ interface TreatmentRecordsProps {
   treatments: Treatment[];
   onAddTreatment: (treatment: Treatment) => void;
   patients: Patient[];
+  selectedPatient?: Patient | null;
 }
 
 const TreatmentRecords = ({
   treatments,
   onAddTreatment,
   patients,
+  selectedPatient,
 }: TreatmentRecordsProps) => {
   const { toast } = useToast();
   const [showSearch, setShowSearch] = useState(false);
-  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   const [formData, setFormData] = useState({
     patientHN: "",
     treatmentDate: new Date(),
@@ -36,10 +38,17 @@ const TreatmentRecords = ({
     medications: "",
   });
 
+  useEffect(() => {
+    if (selectedPatient) {
+      setCurrentPatient(selectedPatient);
+      setFormData(prev => ({ ...prev, patientHN: selectedPatient.hn }));
+    }
+  }, [selectedPatient]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedPatient) {
+    if (!currentPatient) {
       toast({
         title: "กรุณาเลือกผู้ป่วย",
         description: "โปรดค้นหาและเลือกผู้ป่วยก่อนบันทึกข้อมูล",
@@ -63,7 +72,7 @@ const TreatmentRecords = ({
   };
 
   const handlePatientSelect = (patient: Patient) => {
-    setSelectedPatient(patient);
+    setCurrentPatient(patient);
     setFormData((prev) => ({ ...prev, patientHN: patient.hn }));
   };
 
@@ -74,7 +83,7 @@ const TreatmentRecords = ({
           <PatientSearch
             showSearch={showSearch}
             setShowSearch={setShowSearch}
-            selectedPatient={selectedPatient}
+            selectedPatient={currentPatient}
             patients={patients}
             onPatientSelect={handlePatientSelect}
           />

@@ -10,6 +10,7 @@ const Layout = () => {
   const [patients, setPatients] = useState<Patient[]>([]);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [activeTab, setActiveTab] = useState("patients");
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   const handleAddPatient = (newPatient: Patient) => {
     setPatients([...patients, newPatient]);
@@ -24,6 +25,7 @@ const Layout = () => {
   };
 
   const handleTreatmentClick = (patient: Patient) => {
+    setSelectedPatient(patient);
     setActiveTab("treatments");
   };
 
@@ -65,6 +67,7 @@ const Layout = () => {
             treatments={treatments}
             onAddTreatment={handleAddTreatment}
             patients={patients}
+            selectedPatient={selectedPatient}
           />
         </TabsContent>
 
