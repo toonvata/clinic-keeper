@@ -34,11 +34,11 @@ const Layout = () => {
         birthDate: new Date(p.birth_date),
         age: p.age,
         idNumber: p.id_number,
-        occupation: p.occupation,
+        occupation: p.occupation || '',
         address: p.address,
         phoneNumber: p.phone_number,
-        underlyingDiseases: p.underlying_diseases,
-        drugAllergies: p.drug_allergies
+        underlyingDiseases: p.underlying_diseases || '',
+        drugAllergies: p.drug_allergies || ''
       }));
 
       setPatients(formattedPatients);
@@ -56,14 +56,14 @@ const Layout = () => {
       if (error) throw error;
 
       const formattedTreatments = data.map(t => ({
-        id: t.id,
-        patientHN: t.patient_hn,
+        id: t.id.toString(),
+        patientHN: t.patient_hn || '',
         treatmentDate: new Date(t.treatment_date),
         vitalSigns: {
-          bloodPressure: t.blood_pressure,
-          heartRate: t.heart_rate,
-          temperature: t.temperature,
-          respiratoryRate: t.respiratory_rate
+          bloodPressure: t.blood_pressure || '',
+          heartRate: t.heart_rate || 0,
+          temperature: t.temperature || 0,
+          respiratoryRate: t.respiratory_rate || 0
         },
         symptoms: t.symptoms,
         diagnosis: t.diagnosis,
