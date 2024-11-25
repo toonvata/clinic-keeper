@@ -38,16 +38,24 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
     return age;
   };
 
+  const convertBEtoCE = (beDate: string): Date => {
+    const [year, month, day] = beDate.split('-').map(Number);
+    return new Date(year - 543, month - 1, day);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newHn = generateHN();
     setHn(newHn);
     
+    const birthDate = convertBEtoCE(formData.birthDate?.toString() || '');
+    
     const newPatient: Patient = {
       ...formData as Patient,
       hn: newHn,
       registrationDate: new Date(),
-      age: calculateAge(new Date(formData.birthDate!))
+      birthDate,
+      age: calculateAge(birthDate)
     };
 
     try {
@@ -84,6 +92,14 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
         variant: "destructive"
       });
     }
+  };
+
+  const getCurrentBEDate = () => {
+    const today = new Date();
+    const beYear = today.getFullYear() + 543;
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    return `${beYear}-${month}-${day}`;
   };
 
   return (
@@ -125,13 +141,15 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="birthDate">วันเกิด</Label>
+              <Label htmlFor="birthDate">วันเกิด (พ.ศ.)</Label>
               <Input
                 id="birthDate"
                 type="date"
                 required
-                onChange={(e) => setFormData({ ...formData, birthDate: new Date(e.target.value) })}
+                max={getCurrentBEDate()}
+                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
               />
+              <span className="text-sm text-gray-500">กรุณาใส่วันเกิดในรูปแบบ พ.ศ.</span>
             </div>
             
             <div className="space-y-2">
@@ -192,7 +210,6 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
       </CardContent>
     </Card>
   );
-
 };
 
 export default PatientRecords;
