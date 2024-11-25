@@ -1,98 +1,110 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type Database = {
   public: {
     Tables: {
       patients: {
         Row: {
-          id: number
-          hn: string
-          registration_date: string
-          first_name: string
-          last_name: string
-          birth_date: string
-          age: number
-          id_number: string
-          occupation: string | null
           address: string
-          phone_number: string
-          underlying_diseases: string | null
-          drug_allergies: string | null
+          age: number
+          birth_date: string
           created_at: string
+          drug_allergies: string | null
+          first_name: string
+          hn: string
+          id: number
+          id_number: string
+          last_name: string
+          occupation: string | null
+          phone_number: string
+          registration_date: string
+          underlying_diseases: string | null
         }
         Insert: {
-          hn: string
-          registration_date?: string
-          first_name: string
-          last_name: string
-          birth_date: string
-          age: number
-          id_number: string
-          occupation?: string | null
           address: string
-          phone_number: string
-          underlying_diseases?: string | null
-          drug_allergies?: string | null
+          age: number
+          birth_date: string
           created_at?: string
+          drug_allergies?: string | null
+          first_name: string
+          hn: string
+          id?: never
+          id_number: string
+          last_name: string
+          occupation?: string | null
+          phone_number: string
+          registration_date?: string
+          underlying_diseases?: string | null
         }
         Update: {
-          hn?: string
-          registration_date?: string
-          first_name?: string
-          last_name?: string
-          birth_date?: string
-          age?: number
-          id_number?: string
-          occupation?: string | null
           address?: string
-          phone_number?: string
-          underlying_diseases?: string | null
-          drug_allergies?: string | null
+          age?: number
+          birth_date?: string
           created_at?: string
+          drug_allergies?: string | null
+          first_name?: string
+          hn?: string
+          id?: never
+          id_number?: string
+          last_name?: string
+          occupation?: string | null
+          phone_number?: string
+          registration_date?: string
+          underlying_diseases?: string | null
         }
         Relationships: []
       }
       treatments: {
         Row: {
-          id: number
-          patient_hn: string | null
-          treatment_date: string
           blood_pressure: string | null
-          heart_rate: number | null
-          temperature: number | null
-          respiratory_rate: number | null
-          symptoms: string
+          created_at: string
           diagnosis: string
-          treatment: string
+          heart_rate: number | null
+          id: number
           medications: string
           next_appointment: string | null
-          created_at: string
+          patient_hn: string | null
+          respiratory_rate: number | null
+          symptoms: string
+          temperature: number | null
+          treatment: string
+          treatment_date: string
         }
         Insert: {
-          patient_hn?: string | null
-          treatment_date?: string
           blood_pressure?: string | null
-          heart_rate?: number | null
-          temperature?: number | null
-          respiratory_rate?: number | null
-          symptoms: string
+          created_at?: string
           diagnosis: string
-          treatment: string
+          heart_rate?: number | null
+          id?: never
           medications: string
           next_appointment?: string | null
-          created_at?: string
+          patient_hn?: string | null
+          respiratory_rate?: number | null
+          symptoms: string
+          temperature?: number | null
+          treatment: string
+          treatment_date?: string
         }
         Update: {
-          patient_hn?: string | null
-          treatment_date?: string
           blood_pressure?: string | null
-          heart_rate?: number | null
-          temperature?: number | null
-          respiratory_rate?: number | null
-          symptoms?: string
+          created_at?: string
           diagnosis?: string
-          treatment?: string
+          heart_rate?: number | null
+          id?: never
           medications?: string
           next_appointment?: string | null
-          created_at?: string
+          patient_hn?: string | null
+          respiratory_rate?: number | null
+          symptoms?: string
+          temperature?: number | null
+          treatment?: string
+          treatment_date?: string
         }
         Relationships: [
           {
@@ -101,16 +113,118 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "patients"
             referencedColumns: ["hn"]
-          }
+          },
         ]
       }
     }
-    Views: {}
-    Functions: {}
-    Enums: {}
-    CompositeTypes: {}
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
-export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never

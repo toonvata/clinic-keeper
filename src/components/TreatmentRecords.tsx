@@ -6,6 +6,7 @@ import { Treatment, Patient } from "@/types";
 import { PatientSearch } from "./treatment/PatientSearch";
 import { VitalSignsForm } from "./treatment/VitalSignsForm";
 import { TreatmentForm } from "./treatment/TreatmentForm";
+import { supabase } from "@/integrations/supabase/client";
 
 interface TreatmentRecordsProps {
   treatments: Treatment[];
@@ -45,7 +46,7 @@ const TreatmentRecords = ({
     }
   }, [selectedPatient]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!currentPatient) {
@@ -57,18 +58,72 @@ const TreatmentRecords = ({
       return;
     }
 
-    const newTreatment: Treatment = {
-      id: `TR${Date.now()}`,
-      ...formData,
-      treatmentDate: new Date(formData.treatmentDate),
-    };
+    try {
+      const { data, error } = await supabase
+        .from('treatments')
+        .insert({
+          patient_hn: formData.patientHN,
+          treatment_date: formData.treatmentDate.toISOString(),
+          blood_pressure: formData.vitalSigns.bloodPressure,
+          heart_rate: formData.vitalSigns.heartRate,
+          temperature: formData.vitalSigns.temperature,
+          respiratory_rate: formData.vitalSigns.respiratoryRate,
+          symptoms: formData.symptoms,
+          diagnosis: formData.diagnosis,
+          treatment: formData.treatment,
+          medications: formData.medications
+        })
+        .select()
+        .single();
 
-    onAddTreatment(newTreatment);
+      if (error) throw error;
 
-    toast({
-      title: "บันทึกข้อมูลสำเร็จ",
-      description: `บันทึกการรักษาสำหรับ HN: ${formData.patientHN}`,
-    });
+      const newTreatment: Treatment = {
+        id: data.id.toString(),
+        patientHN: data.patient_hn,
+        treatmentDate: new Date(data.treatment_date),
+        vitalSigns: {
+          bloodPressure: data.blood_pressure || "",
+          heartRate: data.heart_rate || 0,
+          temperature: data.temperature || 0,
+          respiratoryRate: data.respiratory_rate || 0,
+        },
+        symptoms: data.symptoms,
+        diagnosis: data.diagnosis,
+        treatment: data.treatment,
+        medications: data.medications,
+      };
+
+      onAddTreatment(newTreatment);
+
+      // Reset form
+      setFormData({
+        patientHN: currentPatient.hn,
+        treatmentDate: new Date(),
+        vitalSigns: {
+          bloodPressure: "",
+          heartRate: 0,
+          temperature: 0,
+          respiratoryRate: 0,
+        },
+        symptoms: "",
+        diagnosis: "",
+        treatment: "",
+        medications: "",
+      });
+
+      toast({
+        title: "บันทึกข้อมูลสำเร็จ",
+        description: `บันทึกการรักษาสำหรับ HN: ${formData.patientHN}`,
+      });
+    } catch (error) {
+      console.error('Error saving treatment:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลการรักษาได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    }
   };
 
   const handlePatientSelect = (patient: Patient) => {
