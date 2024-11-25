@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { convertBEtoCE, calculateAge, getCurrentBEDate } from "@/utils/dateUtils";
+import { PatientFormHeader } from "./patient/PatientFormHeader";
 
 interface PatientRecordsProps {
   onAddPatient: (patient: Patient) => void;
@@ -14,7 +16,7 @@ interface PatientRecordsProps {
 
 const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState<Partial<Patient>>({});
+  const [formData, setFormData] = useState<Partial<Patient & { birthDate?: string }>>({});
   const [hn, setHn] = useState<string>("");
   const [registrationDate, setRegistrationDate] = useState<Date>(new Date());
 
@@ -25,30 +27,20 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
     return `${year}${random}`;
   };
 
-  const calculateAge = (birthDate: Date) => {
-    const today = new Date();
-    const birth = new Date(birthDate);
-    let age = today.getFullYear() - birth.getFullYear();
-    const monthDiff = today.getMonth() - birth.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
-
-  const convertBEtoCE = (beDate: string): Date => {
-    const [year, month, day] = beDate.split('-').map(Number);
-    return new Date(year - 543, month - 1, day);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newHn = generateHN();
     setHn(newHn);
     
-    const birthDate = convertBEtoCE(formData.birthDate?.toString() || '');
+    if (!formData.birthDate) {
+      toast({
+        title: "กรุณากรอกวันเกิด",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const birthDate = convertBEtoCE(formData.birthDate);
     
     const newPatient: Patient = {
       ...formData as Patient,
@@ -94,31 +86,10 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
     }
   };
 
-  const getCurrentBEDate = () => {
-    const today = new Date();
-    const beYear = today.getFullYear() + 543;
-    const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    const day = today.getDate().toString().padStart(2, '0');
-    return `${beYear}-${month}-${day}`;
-  };
-
   return (
     <Card>
       <CardContent className="pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="space-y-2">
-            <Label>HN</Label>
-            <Input value={hn || "-"} disabled />
-          </div>
-          <div className="space-y-2">
-            <Label>วันที่มารักษา</Label>
-            <Input 
-              type="text" 
-              value={registrationDate.toLocaleDateString('th-TH')} 
-              disabled 
-            />
-          </div>
-        </div>
+        <PatientFormHeader hn={hn} registrationDate={registrationDate} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
