@@ -103,7 +103,6 @@ const Layout = () => {
       const { error } = await supabase
         .from('treatments')
         .insert({
-          id: newTreatment.id,
           patient_hn: newTreatment.patientHN,
           treatment_date: newTreatment.treatmentDate.toISOString(),
           blood_pressure: newTreatment.vitalSigns.bloodPressure,
@@ -179,7 +178,6 @@ const Layout = () => {
       </Tabs>
     </div>
   );
-
 };
 
 export default Layout;
