@@ -40,12 +40,14 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
       return;
     }
 
+    const birthDate = new Date(formData.birthDate);
+    
     const newPatient: Patient = {
       ...formData as Patient,
       hn: newHn,
       registrationDate: new Date(),
-      birthDate: new Date(formData.birthDate),
-      age: calculateAge(new Date(formData.birthDate))
+      birthDate: birthDate,
+      age: calculateAge(birthDate)
     };
 
     try {
@@ -116,7 +118,10 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
                 type="date"
                 required
                 max={new Date().toISOString().split('T')[0]}
-                onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
+                onChange={(e) => {
+                  const date = new Date(e.target.value);
+                  setFormData({ ...formData, birthDate: date });
+                }}
               />
               <span className="text-sm text-gray-500">กรุณาใส่วันเกิดในรูปแบบ ค.ศ.</span>
             </div>
