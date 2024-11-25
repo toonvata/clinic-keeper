@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PatientRecordsProps {
   onAddPatient: (patient: Patient) => void;
@@ -49,12 +50,40 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
       age: calculateAge(new Date(formData.birthDate!))
     };
 
-    onAddPatient(newPatient);
-    
-    toast({
-      title: "บันทึกข้อมูลสำเร็จ",
-      description: `HN: ${newHn}`,
-    });
+    try {
+      const { error } = await supabase
+        .from('patients')
+        .insert({
+          hn: newPatient.hn,
+          registration_date: newPatient.registrationDate.toISOString(),
+          first_name: newPatient.firstName,
+          last_name: newPatient.lastName,
+          birth_date: newPatient.birthDate.toISOString(),
+          age: newPatient.age,
+          id_number: newPatient.idNumber,
+          occupation: newPatient.occupation,
+          address: newPatient.address,
+          phone_number: newPatient.phoneNumber,
+          underlying_diseases: newPatient.underlyingDiseases,
+          drug_allergies: newPatient.drugAllergies
+        });
+
+      if (error) throw error;
+
+      onAddPatient(newPatient);
+      
+      toast({
+        title: "บันทึกข้อมูลสำเร็จ",
+        description: `HN: ${newHn}`,
+      });
+    } catch (error) {
+      console.error('Error inserting patient:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถบันทึกข้อมูลได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -163,6 +192,7 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
       </CardContent>
     </Card>
   );
+
 };
 
 export default PatientRecords;
