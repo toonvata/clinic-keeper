@@ -79,7 +79,6 @@ const Layout = () => {
   };
 
   const handleAddPatient = async (newPatient: Patient) => {
-    setPatients([...patients, newPatient]);
     await fetchPatients(); // Refresh the list after adding
   };
 
@@ -99,30 +98,7 @@ const Layout = () => {
   };
 
   const handleAddTreatment = async (newTreatment: Treatment) => {
-    try {
-      const { error } = await supabase
-        .from('treatments')
-        .insert({
-          patient_hn: newTreatment.patientHN,
-          treatment_date: newTreatment.treatmentDate.toISOString(),
-          blood_pressure: newTreatment.vitalSigns.bloodPressure,
-          heart_rate: newTreatment.vitalSigns.heartRate,
-          temperature: newTreatment.vitalSigns.temperature,
-          respiratory_rate: newTreatment.vitalSigns.respiratoryRate,
-          symptoms: newTreatment.symptoms,
-          diagnosis: newTreatment.diagnosis,
-          treatment: newTreatment.treatment,
-          medications: newTreatment.medications,
-          next_appointment: newTreatment.nextAppointment?.toISOString()
-        });
-
-      if (error) throw error;
-
-      setTreatments([...treatments, newTreatment]);
-      await fetchTreatments(); // Refresh the list after adding
-    } catch (error) {
-      console.error('Error adding treatment:', error);
-    }
+    await fetchTreatments(); // Refresh the list after adding
   };
 
   const handleTreatmentClick = (patient: Patient) => {

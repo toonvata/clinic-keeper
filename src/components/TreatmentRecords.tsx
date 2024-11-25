@@ -94,9 +94,6 @@ const TreatmentRecords = ({
         medications: data.medications,
       };
 
-      // Call onAddTreatment to update the parent component's state
-      onAddTreatment(newTreatment);
-
       // Reset form
       setFormData({
         patientHN: currentPatient.hn,
@@ -112,6 +109,9 @@ const TreatmentRecords = ({
         treatment: "",
         medications: "",
       });
+
+      // Call onAddTreatment to update the parent component's state
+      onAddTreatment(newTreatment);
 
       toast({
         title: "บันทึกข้อมูลสำเร็จ",
