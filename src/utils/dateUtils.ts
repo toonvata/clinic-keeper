@@ -1,8 +1,3 @@
-export const convertBEtoCE = (beDate: string): Date => {
-  const [year, month, day] = beDate.split('-').map(Number);
-  return new Date(year - 543, month - 1, day);
-};
-
 export const calculateAge = (birthDate: Date) => {
   const today = new Date();
   const birth = new Date(birthDate);
@@ -14,12 +9,4 @@ export const calculateAge = (birthDate: Date) => {
   }
   
   return age;
-};
-
-export const getCurrentBEDate = () => {
-  const today = new Date();
-  const beYear = today.getFullYear() + 543;
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');
-  const day = today.getDate().toString().padStart(2, '0');
-  return `${beYear}-${month}-${day}`;
 };

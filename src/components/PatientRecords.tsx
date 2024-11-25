@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { Patient } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
-import { convertBEtoCE, calculateAge, getCurrentBEDate } from "@/utils/dateUtils";
+import { calculateAge } from "@/utils/dateUtils";
 import { PatientFormHeader } from "./patient/PatientFormHeader";
 
 interface PatientRecordsProps {
@@ -16,7 +16,7 @@ interface PatientRecordsProps {
 
 const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
   const { toast } = useToast();
-  const [formData, setFormData] = useState<Partial<Patient & { birthDate?: string }>>({});
+  const [formData, setFormData] = useState<Partial<Patient>>({});
   const [hn, setHn] = useState<string>("");
   const [registrationDate, setRegistrationDate] = useState<Date>(new Date());
 
@@ -40,14 +40,12 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
       return;
     }
 
-    const birthDate = convertBEtoCE(formData.birthDate);
-    
     const newPatient: Patient = {
       ...formData as Patient,
       hn: newHn,
       registrationDate: new Date(),
-      birthDate,
-      age: calculateAge(birthDate)
+      birthDate: new Date(formData.birthDate),
+      age: calculateAge(new Date(formData.birthDate))
     };
 
     try {
@@ -112,15 +110,15 @@ const PatientRecords = ({ onAddPatient }: PatientRecordsProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="birthDate">วันเกิด (พ.ศ.)</Label>
+              <Label htmlFor="birthDate">วันเกิด (ค.ศ.)</Label>
               <Input
                 id="birthDate"
                 type="date"
                 required
-                max={getCurrentBEDate()}
+                max={new Date().toISOString().split('T')[0]}
                 onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
               />
-              <span className="text-sm text-gray-500">กรุณาใส่วันเกิดในรูปแบบ พ.ศ.</span>
+              <span className="text-sm text-gray-500">กรุณาใส่วันเกิดในรูปแบบ ค.ศ.</span>
             </div>
             
             <div className="space-y-2">
