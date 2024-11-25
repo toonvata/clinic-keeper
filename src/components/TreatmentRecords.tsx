@@ -94,6 +94,7 @@ const TreatmentRecords = ({
         medications: data.medications,
       };
 
+      // Call onAddTreatment to update the parent component's state
       onAddTreatment(newTreatment);
 
       // Reset form
