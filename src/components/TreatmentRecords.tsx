@@ -6,6 +6,7 @@ import { Treatment, Patient } from "@/types";
 import { PatientSearch } from "./treatment/PatientSearch";
 import { VitalSignsForm } from "./treatment/VitalSignsForm";
 import { TreatmentForm } from "./treatment/TreatmentForm";
+import { DoctorSelect } from "./treatment/DoctorSelect";
 import { supabase } from "@/integrations/supabase/client";
 
 interface TreatmentRecordsProps {
@@ -24,6 +25,7 @@ const TreatmentRecords = ({
   const { toast } = useToast();
   const [showSearch, setShowSearch] = useState(false);
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     patientHN: "",
     treatmentDate: new Date(),
@@ -58,6 +60,15 @@ const TreatmentRecords = ({
       return;
     }
 
+    if (!selectedDoctorId) {
+      toast({
+        title: "กรุณาเลือกแพทย์",
+        description: "โปรดเลือกแพทย์ก่อนบันทึกข้อมูล",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('treatments')
@@ -71,7 +82,8 @@ const TreatmentRecords = ({
           symptoms: formData.symptoms,
           diagnosis: formData.diagnosis,
           treatment: formData.treatment,
-          medications: formData.medications
+          medications: formData.medications,
+          doctor_id: selectedDoctorId
         })
         .select()
         .single();
@@ -92,6 +104,7 @@ const TreatmentRecords = ({
         diagnosis: data.diagnosis,
         treatment: data.treatment,
         medications: data.medications,
+        doctorId: data.doctor_id
       };
 
       // Reset form
@@ -142,6 +155,11 @@ const TreatmentRecords = ({
             selectedPatient={currentPatient}
             patients={patients}
             onPatientSelect={handlePatientSelect}
+          />
+
+          <DoctorSelect
+            selectedDoctorId={selectedDoctorId}
+            onDoctorSelect={setSelectedDoctorId}
           />
 
           <VitalSignsForm formData={formData} setFormData={setFormData} />

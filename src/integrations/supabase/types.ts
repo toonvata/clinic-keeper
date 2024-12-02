@@ -9,6 +9,27 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      doctors: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+          title?: string
+        }
+        Relationships: []
+      }
       patients: {
         Row: {
           address: string
@@ -65,6 +86,7 @@ export type Database = {
           blood_pressure: string | null
           created_at: string
           diagnosis: string
+          doctor_id: number | null
           heart_rate: number | null
           id: number
           medications: string
@@ -80,6 +102,7 @@ export type Database = {
           blood_pressure?: string | null
           created_at?: string
           diagnosis: string
+          doctor_id?: number | null
           heart_rate?: number | null
           id?: never
           medications: string
@@ -95,6 +118,7 @@ export type Database = {
           blood_pressure?: string | null
           created_at?: string
           diagnosis?: string
+          doctor_id?: number | null
           heart_rate?: number | null
           id?: never
           medications?: string
@@ -107,6 +131,13 @@ export type Database = {
           treatment_date?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "treatments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "treatments_patient_hn_fkey"
             columns: ["patient_hn"]

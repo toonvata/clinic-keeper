@@ -31,4 +31,5 @@ export interface Treatment {
   treatment: string;
   medications: string;
   nextAppointment?: Date;
+  doctorId?: number;
 }
