@@ -9,6 +9,20 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ patients, treatments }: DashboardProps) => {
+  // Process daily data for patients
+  const dailyPatientData = patients.reduce((acc: any[], patient) => {
+    const day = format(new Date(patient.registrationDate), 'dd MMM yyyy');
+    const existingDay = acc.find(item => item.day === day);
+    
+    if (existingDay) {
+      existingDay.count += 1;
+    } else {
+      acc.push({ day, count: 1 });
+    }
+    
+    return acc;
+  }, []);
+
   // Process monthly data for patients
   const monthlyPatientData = patients.reduce((acc: any[], patient) => {
     const month = format(new Date(patient.registrationDate), 'MMM yyyy');
@@ -81,6 +95,25 @@ const Dashboard = ({ patients, treatments }: DashboardProps) => {
               <h3 className="text-lg font-semibold">จำนวนการรักษาทั้งหมด</h3>
               <p className="text-3xl font-bold">{treatments.length}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>จำนวนผู้ป่วยรายวัน</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={dailyPatientData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="count" fill="#6366f1" name="จำนวนผู้ป่วย" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
