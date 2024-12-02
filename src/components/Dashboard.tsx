@@ -3,6 +3,7 @@ import { Patient, Treatment } from "@/types";
 import DailyPatientSummary from "./dashboard/DailyPatientSummary";
 import MonthlyStats from "./dashboard/MonthlyStats";
 import YearlyStats from "./dashboard/YearlyStats";
+import DoctorStats from "./dashboard/DoctorStats";
 
 interface DashboardProps {
   patients: Patient[];
@@ -30,6 +31,7 @@ const Dashboard = ({ patients, treatments }: DashboardProps) => {
         </CardContent>
       </Card>
 
+      <DoctorStats treatments={treatments} />
       <DailyPatientSummary patients={patients} />
 
       <div className="grid grid-cols-2 gap-4">
