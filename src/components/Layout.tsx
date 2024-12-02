@@ -6,8 +6,12 @@ import Dashboard from "@/components/Dashboard";
 import PatientList from "@/components/PatientList";
 import { Patient, Treatment } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { Button } from "./ui/button";
+import { LogOut } from "lucide-react";
 
 const Layout = () => {
+  const navigate = useNavigate();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [activeTab, setActiveTab] = useState("patients");
@@ -106,9 +110,23 @@ const Layout = () => {
     setActiveTab("treatments");
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/login");
+  };
+
   return (
     <div className="container mx-auto p-4 min-h-screen">
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="absolute right-0 top-0 flex items-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          ออกจากระบบ
+        </Button>
         <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
         <p className="text-gray-600 mt-2">
           เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก
