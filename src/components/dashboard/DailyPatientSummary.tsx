@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface DailyPatientSummaryProps {
   patients: Patient[];
@@ -27,6 +28,9 @@ const DailyPatientSummary = ({ patients }: DailyPatientSummaryProps) => {
     return acc;
   }, []);
 
+  // Sort days in descending order (newest first)
+  dailyPatientData.sort((a, b) => new Date(b.day).getTime() - new Date(a.day).getTime());
+
   return (
     <div className="space-y-4">
       <Card>
@@ -34,6 +38,21 @@ const DailyPatientSummary = ({ patients }: DailyPatientSummaryProps) => {
           <CardTitle>จำนวนผู้ป่วยรายวัน</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Select defaultValue={dailyPatientData[0]?.day}>
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="เลือกวันที่" />
+              </SelectTrigger>
+              <SelectContent>
+                {dailyPatientData.map((dayData) => (
+                  <SelectItem key={dayData.day} value={dayData.day}>
+                    {dayData.day} - {dayData.count} คน
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="h-[300px] mb-6">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dailyPatientData}>
