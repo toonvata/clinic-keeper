@@ -9,68 +9,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
-import { useAuth } from "./AuthProvider";
 
 const Layout = () => {
   const navigate = useNavigate();
-  const { session } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [activeTab, setActiveTab] = useState("patients");
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-  const [currentDoctor, setCurrentDoctor] = useState<{ id: number; name: string } | null>(null);
 
   useEffect(() => {
-    if (session?.user) {
-      fetchDoctorInfo();
-    }
-  }, [session]);
-
-  useEffect(() => {
-    if (currentDoctor) {
-      fetchPatients();
-      fetchTreatments();
-    }
-  }, [currentDoctor]);
-
-  const fetchDoctorInfo = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('doctors')
-        .select('id, name')
-        .eq('user_id', session?.user.id)
-        .single();
-      
-      if (error) throw error;
-      setCurrentDoctor(data);
-    } catch (error) {
-      console.error('Error fetching doctor info:', error);
-    }
-  };
+    fetchPatients();
+    fetchTreatments();
+  }, []);
 
   const fetchPatients = async () => {
-    if (!currentDoctor) return;
-
     try {
-      // Get unique patient HNs from treatments for this doctor
-      const { data: doctorTreatments, error: treatmentsError } = await supabase
-        .from('treatments')
-        .select('patient_hn')
-        .eq('doctor_id', currentDoctor.id);
-      
-      if (treatmentsError) throw treatmentsError;
-
-      const uniquePatientHNs = [...new Set(doctorTreatments.map(t => t.patient_hn))];
-
-      if (uniquePatientHNs.length === 0) {
-        setPatients([]);
-        return;
-      }
-
       const { data, error } = await supabase
         .from('patients')
-        .select('*')
-        .in('hn', uniquePatientHNs);
+        .select('*');
       
       if (error) throw error;
 
@@ -96,13 +52,10 @@ const Layout = () => {
   };
 
   const fetchTreatments = async () => {
-    if (!currentDoctor) return;
-
     try {
       const { data, error } = await supabase
         .from('treatments')
-        .select('*')
-        .eq('doctor_id', currentDoctor.id);
+        .select('*');
       
       if (error) throw error;
 
@@ -120,8 +73,7 @@ const Layout = () => {
         diagnosis: t.diagnosis,
         treatment: t.treatment,
         medications: t.medications,
-        nextAppointment: t.next_appointment ? new Date(t.next_appointment) : undefined,
-        doctorId: t.doctor_id
+        nextAppointment: t.next_appointment ? new Date(t.next_appointment) : undefined
       }));
 
       setTreatments(formattedTreatments);
@@ -131,7 +83,7 @@ const Layout = () => {
   };
 
   const handleAddPatient = async (newPatient: Patient) => {
-    await fetchPatients();
+    await fetchPatients(); // Refresh the list after adding
   };
 
   const handleDeletePatient = async (hn: string) => {
@@ -150,7 +102,7 @@ const Layout = () => {
   };
 
   const handleAddTreatment = async (newTreatment: Treatment) => {
-    await fetchTreatments();
+    await fetchTreatments(); // Refresh the list after adding
   };
 
   const handleTreatmentClick = (patient: Patient) => {
@@ -166,22 +118,15 @@ const Layout = () => {
   return (
     <div className="container mx-auto p-4 min-h-screen">
       <div className="text-center mb-6 relative">
-        <div className="absolute right-0 top-0 flex items-center gap-2">
-          {currentDoctor && (
-            <span className="text-sm text-gray-600">
-              แพทย์: {currentDoctor.name}
-            </span>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="flex items-center gap-2"
-          >
-            <LogOut className="w-4 h-4" />
-            ออกจากระบบ
-          </Button>
-        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="absolute right-0 top-0 flex items-center gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          ออกจากระบบ
+        </Button>
         <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
         <p className="text-gray-600 mt-2">
           เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก
