@@ -83,7 +83,7 @@ const Layout = () => {
   };
 
   const handleAddPatient = async (newPatient: Patient) => {
-    await fetchPatients(); // Refresh the list after adding
+    await fetchPatients();
   };
 
   const handleDeletePatient = async (hn: string) => {
@@ -102,7 +102,7 @@ const Layout = () => {
   };
 
   const handleAddTreatment = async (newTreatment: Treatment) => {
-    await fetchTreatments(); // Refresh the list after adding
+    await fetchTreatments();
   };
 
   const handleTreatmentClick = (patient: Patient) => {
@@ -117,7 +117,7 @@ const Layout = () => {
 
   return (
     <div className="container mx-auto p-4 min-h-screen">
-      <div className="text-center mb-6 relative">
+      <div className="mb-6 relative">
         <Button
           variant="ghost"
           size="sm"
@@ -127,13 +127,15 @@ const Layout = () => {
           <LogOut className="w-4 h-4" />
           ออกจากระบบ
         </Button>
-        <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
-        <p className="text-gray-600 mt-2">
-          เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก
-        </p>
-        <p className="text-gray-600">
-          162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร. 0909149946
-        </p>
+        <div className="text-left">
+          <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
+          <p className="text-gray-600 mt-2">
+            เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก
+          </p>
+          <p className="text-gray-600">
+            162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร. 0909149946
+          </p>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
