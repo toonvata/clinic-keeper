@@ -10,12 +10,13 @@ export const PatientFormHeader = ({ hn, registrationDate }: PatientFormHeaderPro
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
       <div className="space-y-2">
-        <Label>HN</Label>
-        <Input value={hn || "-"} disabled />
+        <Label htmlFor="hn">HN</Label>
+        <Input id="hn" value={hn || "-"} disabled />
       </div>
       <div className="space-y-2">
-        <Label>วันที่มารักษา</Label>
+        <Label htmlFor="registrationDate">วันที่มารักษา</Label>
         <Input 
+          id="registrationDate"
           type="text" 
           value={registrationDate.toLocaleDateString('th-TH')} 
           disabled 
