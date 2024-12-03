@@ -140,17 +140,19 @@ const Layout = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="patients">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
-          <TabsTrigger value="patient-list">รายชื่อผู้ป่วย</TabsTrigger>
-          <TabsTrigger value="treatments">บันทึกการรักษา</TabsTrigger>
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="patients" className="justify-start">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
+          <TabsTrigger value="patient-list" className="justify-start">รายชื่อผู้ป่วย</TabsTrigger>
+          <TabsTrigger value="treatments" className="justify-start">บันทึกการรักษา</TabsTrigger>
+          <TabsTrigger value="dashboard" className="justify-start">Dashboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="patients">
+          <h2 className="text-2xl font-semibold mb-4 text-left">บันทึกข้อมูลผู้ป่วย</h2>
           <PatientRecords onAddPatient={handleAddPatient} />
         </TabsContent>
 
         <TabsContent value="patient-list">
+          <h2 className="text-2xl font-semibold mb-4 text-left">รายชื่อผู้ป่วย</h2>
           <PatientList
             patients={patients}
             treatments={treatments}
@@ -160,6 +162,7 @@ const Layout = () => {
         </TabsContent>
 
         <TabsContent value="treatments">
+          <h2 className="text-2xl font-semibold mb-4 text-left">บันทึกการรักษา</h2>
           <TreatmentRecords
             treatments={treatments}
             onAddTreatment={handleAddTreatment}
@@ -169,6 +172,7 @@ const Layout = () => {
         </TabsContent>
 
         <TabsContent value="dashboard">
+          <h2 className="text-2xl font-semibold mb-4 text-left">Dashboard</h2>
           <Dashboard patients={patients} treatments={treatments} />
         </TabsContent>
       </Tabs>
