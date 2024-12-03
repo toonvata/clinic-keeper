@@ -127,7 +127,7 @@ const Layout = () => {
           <LogOut className="w-4 h-4" />
           ออกจากระบบ
         </Button>
-        <div className="text-left">
+        <div className="text-center">
           <h1 className="text-3xl font-bold">House of Herb wellness clinic</h1>
           <p className="text-gray-600 mt-2">
             เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก
@@ -140,10 +140,10 @@ const Layout = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="patients" className="justify-start">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
-          <TabsTrigger value="patient-list" className="justify-start">รายชื่อผู้ป่วย</TabsTrigger>
-          <TabsTrigger value="treatments" className="justify-start">บันทึกการรักษา</TabsTrigger>
-          <TabsTrigger value="dashboard" className="justify-start">Dashboard</TabsTrigger>
+          <TabsTrigger value="patients" className="justify-center">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
+          <TabsTrigger value="patient-list" className="justify-center">รายชื่อผู้ป่วย</TabsTrigger>
+          <TabsTrigger value="treatments" className="justify-center">บันทึกการรักษา</TabsTrigger>
+          <TabsTrigger value="dashboard" className="justify-center">Dashboard</TabsTrigger>
         </TabsList>
 
         <TabsContent value="patients">
