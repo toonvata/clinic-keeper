@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MedicalCertificateFormProps {
   patient: Patient;
@@ -47,11 +48,87 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       return;
     }
 
-    // TODO: Implement print functionality
-    toast({
-      title: "กำลังพิมพ์เอกสาร",
-      description: "ระบบกำลังสร้างไฟล์ PDF กรุณารอสักครู่",
-    });
+    try {
+      // Get doctor name
+      const { data: doctorData, error: doctorError } = await supabase
+        .from('doctors')
+        .select('name')
+        .eq('id', selectedDoctorId)
+        .single();
+
+      if (doctorError) throw doctorError;
+
+      // Calculate rest days if both start and end dates are set
+      let restDays = 0;
+      if (startDate && endDate) {
+        restDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      }
+
+      // Generate certificate number (you might want to implement a more sophisticated system)
+      const certificateNumber = `MC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+      const certificateData = {
+        certificateNumber,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        doctorName: doctorData.name,
+        visitDate: visitDate.toISOString(),
+        startDate: startDate?.toISOString(),
+        endDate: endDate?.toISOString(),
+        restDays,
+        diagnosis
+      };
+
+      // Call the Edge Function to generate PDF
+      const response = await fetch(
+        'https://qezunutqfumuzloarrti.supabase.co/functions/v1/generate-medical-certificate',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ certificateData })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const { pdfUrl } = await response.json();
+
+      // Save certificate data to database
+      const { error: insertError } = await supabase
+        .from('medical_certificates')
+        .insert({
+          certificate_number: certificateNumber,
+          patient_hn: patient.hn,
+          doctor_id: selectedDoctorId,
+          visit_date: visitDate.toISOString(),
+          start_date: startDate?.toISOString(),
+          end_date: endDate?.toISOString(),
+          rest_days: restDays,
+          diagnosis,
+          pdf_url: pdfUrl
+        });
+
+      if (insertError) throw insertError;
+
+      // Open PDF in new tab
+      window.open(pdfUrl, '_blank');
+
+      toast({
+        title: "พิมพ์เอกสารสำเร็จ",
+        description: "ระบบได้สร้างไฟล์ PDF เรียบร้อยแล้ว",
+      });
+    } catch (error) {
+      console.error('Error generating certificate:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบรับรองแพทย์ได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
