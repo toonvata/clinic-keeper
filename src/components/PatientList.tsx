@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, History, Trash2 } from "lucide-react";
+import { Search, History, Trash2, FileText } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -61,6 +61,14 @@ const PatientList = ({
     setShowHistory(true);
   };
 
+  const handleMedicalCertificate = (patient: Patient) => {
+    onTreatmentClick(patient); // This sets the selectedPatient in Layout
+    const tabElement = document.querySelector('[value="medical-cert"]') as HTMLElement;
+    if (tabElement) {
+      tabElement.click();
+    }
+  };
+
   const getPatientTreatments = (hn: string) => {
     return treatments.filter((treatment) => treatment.patientHN === hn);
   };
@@ -110,6 +118,14 @@ const PatientList = ({
                   >
                     <History className="h-4 w-4 mr-1" />
                     ประวัติการรักษา
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleMedicalCertificate(patient)}
+                  >
+                    <FileText className="h-4 w-4 mr-1" />
+                    ใบรับรองแพทย์
                   </Button>
                   <Button
                     variant="destructive"
