@@ -33,7 +33,9 @@ const MedicalCertificatePreview = ({
       </div>
 
       <div className="space-y-4">
-        <p>เลขที่: {certificateNumber}</p>
+        <div className="text-right">
+          <p>เลขที่: {certificateNumber}</p>
+        </div>
         <p>ข้าพเจ้า {doctorName} ได้ทำการตรวจร่างกาย</p>
         <p>นาย/นาง/นางสาว {patientName}</p>
         <p>

@@ -33,7 +33,9 @@ const ReceiptPreview = ({
       </div>
 
       <div className="space-y-4">
-        <p>เลขที่: {receiptNumber}</p>
+        <div className="text-right">
+          <p>เลขที่: {receiptNumber}</p>
+        </div>
         <p>วันที่: {format(date, "d MMMM yyyy", { locale: th })}</p>
         <p>ได้รับเงินจาก: {patientName}</p>
 
