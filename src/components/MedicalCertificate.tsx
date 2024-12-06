@@ -43,7 +43,7 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
     },
   });
 
-  const { data: patients, isLoading } = useQuery({
+  const { data: patients } = useQuery({
     queryKey: ["patients"],
     queryFn: async () => {
       const { data, error } = await supabase.from("patients").select("*");
@@ -68,7 +68,7 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
 
   const selectedDoctorData = doctors?.find(d => d.id.toString() === selectedDoctor);
 
-  if (isLoading || !patients) {
+  if (!patients) {
     return <div>กำลังโหลดข้อมูล...</div>;
   }
 
@@ -106,6 +106,11 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
                 <CertificatePreview
                   selectedPatient={currentPatient}
                   selectedDoctorData={selectedDoctorData}
+                  certificateNumber={certificateNumber}
+                  visitDate={visitDate}
+                  startDate={startDate}
+                  endDate={endDate}
+                  restDays={restDays}
                 />
               </div>
 
@@ -122,22 +127,6 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
           )}
         </CardContent>
       </Card>
-
-      <style>
-        {`
-          @media print {
-            body * {
-              visibility: hidden;
-            }
-            .print\\:p-8, .print\\:p-8 * {
-              visibility: visible;
-            }
-            .print\\:hidden {
-              display: none;
-            }
-          }
-        `}
-      </style>
     </div>
   );
 };

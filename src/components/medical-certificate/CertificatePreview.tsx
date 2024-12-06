@@ -4,11 +4,21 @@ import { th } from "date-fns/locale";
 interface CertificatePreviewProps {
   selectedPatient: any;
   selectedDoctorData: any;
+  certificateNumber?: string;
+  visitDate?: string;
+  startDate?: string;
+  endDate?: string;
+  restDays?: string;
 }
 
 export const CertificatePreview = ({
   selectedPatient,
   selectedDoctorData,
+  certificateNumber,
+  visitDate,
+  startDate,
+  endDate,
+  restDays,
 }: CertificatePreviewProps) => {
   if (!selectedPatient) return null;
 
@@ -27,34 +37,35 @@ export const CertificatePreview = ({
 
       <div className="space-y-4">
         <p>
+          เลขที่ {certificateNumber || "__________"}
+        </p>
+        
+        <p>
           ข้าพเจ้า{" "}
           {selectedDoctorData
             ? `${selectedDoctorData.title}${selectedDoctorData.name}`
-            : "_______________"}{" "}
-          ได้ทำการตรวจร่างกาย
+            : "__________"}{" "}
+          ปฏิบัติงาน ณ เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก
         </p>
         
         <p>
-          นาย/นาง/นางสาว {selectedPatient.firstName} {selectedPatient.lastName}
+          เป็นผู้ประกอบวิชาชีพเวชกรรม ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ {selectedDoctorData?.license_number || "__________"}
         </p>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <p>อายุ {selectedPatient.age} ปี</p>
-          <p>เลขประจำตัวประชาชน {selectedPatient.idNumber}</p>
-        </div>
-
-        <p>อาชีพ {selectedPatient.occupation || "-"}</p>
-        <p>ที่อยู่ {selectedPatient.address}</p>
 
         <p>
-          ได้มารับการตรวจรักษาที่คลินิกนี้ เมื่อวันที่{" "}
-          {format(new Date(), "d MMMM yyyy", { locale: th })}
+          ได้ทำการตรวจร่างกาย {selectedPatient.firstName} {selectedPatient.lastName}
+        </p>
+
+        <p>
+          เมื่อวันที่ {visitDate ? format(new Date(visitDate), "d MMMM yyyy", { locale: th }) : "__________"}
         </p>
 
         <div className="space-y-2">
-          <p>ผลการตรวจร่างกาย</p>
-          <p>โรคประจำตัว: {selectedPatient.underlyingDiseases || "ไม่มี"}</p>
-          <p>แพ้ยา: {selectedPatient.drugAllergies || "ไม่มี"}</p>
+          <p>
+            ตั้งแต่วันที่ {startDate ? format(new Date(startDate), "d MMMM yyyy", { locale: th }) : "__________"}{" "}
+            ถึงวันที่ {endDate ? format(new Date(endDate), "d MMMM yyyy", { locale: th }) : "__________"}
+          </p>
+          <p>เป็นเวลา {restDays || "__"} วัน</p>
         </div>
 
         <p>ทั้งนี้ได้ให้การรักษาพร้อมคำแนะนำให้เรียบร้อยแล้ว</p>
@@ -68,7 +79,6 @@ export const CertificatePreview = ({
             : "(แพทย์ผู้ตรวจ)"}
         </p>
         <p className="mt-2">แพทย์ผู้ตรวจ</p>
-        <p className="mt-2">ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ว.</p>
       </div>
     </div>
   );

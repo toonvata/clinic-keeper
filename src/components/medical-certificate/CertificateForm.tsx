@@ -47,75 +47,77 @@ export const CertificateForm = ({
   });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <Label>เลขที่</Label>
-        <Input
-          value={certificateNumber}
-          onChange={(e) => onCertificateNumberChange(e.target.value)}
-          placeholder="เลขที่ใบรับรองแพทย์"
-        />
-      </div>
+    <div className="space-y-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>เลขที่ใบรับรองแพทย์</Label>
+          <Input
+            value={certificateNumber}
+            onChange={(e) => onCertificateNumberChange(e.target.value)}
+            placeholder="เลขที่ใบรับรองแพทย์"
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>แพทย์ผู้ตรวจ</Label>
-        <Select value={selectedDoctor} onValueChange={onDoctorChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="เลือกแพทย์" />
-          </SelectTrigger>
-          <SelectContent>
-            {doctors?.map((doctor) => (
-              <SelectItem key={doctor.id} value={doctor.id.toString()}>
-                {doctor.title} {doctor.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+        <div className="space-y-2">
+          <Label>แพทย์ผู้ตรวจ</Label>
+          <Select value={selectedDoctor} onValueChange={onDoctorChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="เลือกแพทย์" />
+            </SelectTrigger>
+            <SelectContent>
+              {doctors?.map((doctor) => (
+                <SelectItem key={doctor.id} value={doctor.id.toString()}>
+                  {doctor.title}{doctor.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-      <div className="space-y-2">
-        <Label>วันที่มาตรวจ</Label>
-        <Input
-          type="date"
-          value={visitDate}
-          onChange={(e) => onVisitDateChange(e.target.value)}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>วันที่มาตรวจ</Label>
+          <Input
+            type="date"
+            value={visitDate}
+            onChange={(e) => onVisitDateChange(e.target.value)}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>ชื่อผู้ป่วย</Label>
-        <Input
-          value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : ""}
-          disabled
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>ชื่อผู้ป่วย</Label>
+          <Input
+            value={selectedPatient ? `${selectedPatient.firstName} ${selectedPatient.lastName}` : ""}
+            disabled
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>ตั้งแต่วันที่</Label>
-        <Input
-          type="date"
-          value={startDate}
-          onChange={(e) => onStartDateChange(e.target.value)}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>ตั้งแต่วันที่</Label>
+          <Input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>ถึงวันที่</Label>
-        <Input
-          type="date"
-          value={endDate}
-          onChange={(e) => onEndDateChange(e.target.value)}
-        />
-      </div>
+        <div className="space-y-2">
+          <Label>ถึงวันที่</Label>
+          <Input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label>จำนวนวันพัก</Label>
-        <Input
-          type="number"
-          value={restDays}
-          onChange={(e) => onRestDaysChange(e.target.value)}
-          placeholder="จำนวนวัน"
-        />
+        <div className="space-y-2">
+          <Label>จำนวนวันพัก</Label>
+          <Input
+            type="number"
+            value={restDays}
+            onChange={(e) => onRestDaysChange(e.target.value)}
+            placeholder="จำนวนวัน"
+          />
+        </div>
       </div>
     </div>
   );
