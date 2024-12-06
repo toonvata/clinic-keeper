@@ -4,6 +4,7 @@ import PatientRecords from "@/components/PatientRecords";
 import TreatmentRecords from "@/components/TreatmentRecords";
 import Dashboard from "@/components/Dashboard";
 import PatientList from "@/components/PatientList";
+import MedicalCertificate from "@/components/MedicalCertificate";
 import { Patient, Treatment } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
@@ -139,10 +140,11 @@ const Layout = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="patients" className="justify-center">บันทึกข้อมูลผู้ป่วย</TabsTrigger>
           <TabsTrigger value="patient-list" className="justify-center">รายชื่อผู้ป่วย</TabsTrigger>
           <TabsTrigger value="treatments" className="justify-center">บันทึกการรักษา</TabsTrigger>
+          <TabsTrigger value="medical-cert" className="justify-center">ใบรับรองแพทย์</TabsTrigger>
           <TabsTrigger value="dashboard" className="justify-center">Dashboard</TabsTrigger>
         </TabsList>
 
@@ -169,6 +171,11 @@ const Layout = () => {
             patients={patients}
             selectedPatient={selectedPatient}
           />
+        </TabsContent>
+
+        <TabsContent value="medical-cert">
+          <h2 className="text-2xl font-semibold mb-4 text-left">ใบรับรองแพทย์</h2>
+          <MedicalCertificate selectedPatient={selectedPatient} />
         </TabsContent>
 
         <TabsContent value="dashboard">
