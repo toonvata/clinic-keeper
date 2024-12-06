@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import * as puppeteer from 'https://deno.land/x/puppeteer@16.2.0/mod.ts'
+import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
+import { format } from "https://esm.sh/date-fns@2.30.0"
+import { th } from "https://esm.sh/date-fns@2.30.0/locale"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,133 +18,60 @@ serve(async (req) => {
     const { receiptData } = await req.json()
     console.log('Received receipt data:', receiptData)
 
-    // Launch browser with specific configuration for Deno environment
-    const browser = await puppeteer.default.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    })
-    const page = await browser.newPage()
-    console.log('Browser launched successfully')
+    // Create new PDF document
+    const doc = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4'
+    });
 
-    // Generate HTML content
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>ใบเสร็จรับเงิน</title>
-          <style>
-            body { 
-              font-family: sans-serif;
-              padding: 40px;
-              font-size: 16px;
-              line-height: 1.6;
-            }
-            .header {
-              text-align: center;
-              margin-bottom: 30px;
-            }
-            .content {
-              margin: 20px 0;
-            }
-            .amount {
-              margin: 20px 0;
-              padding: 10px;
-              border: 1px solid #000;
-              text-align: center;
-            }
-            .signature {
-              text-align: right;
-              margin-top: 50px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin: 20px 0;
-            }
-            th, td {
-              padding: 8px;
-              text-align: left;
-              border-bottom: 1px solid #ddd;
-            }
-            .amount-column {
-              text-align: right;
-            }
-            .receipt-number {
-              text-align: right;
-              margin-bottom: 20px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>ใบเสร็จรับเงิน</h1>
-            <h2>Receipt</h2>
-            <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
-            <p>162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
-            <p>โทร. 0909149946</p>
-          </div>
+    // Set font
+    doc.setFont('helvetica');
+    
+    // Header
+    doc.setFontSize(20);
+    doc.text('ใบเสร็จรับเงิน', 105, 20, { align: 'center' });
+    doc.setFontSize(16);
+    doc.text('Receipt', 105, 30, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', 105, 40, { align: 'center' });
+    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', 105, 45, { align: 'center' });
+    doc.text('โทร. 0909149946', 105, 50, { align: 'center' });
 
-          <div class="content">
-            <div class="receipt-number">
-              <p>เลขที่: ${receiptData.receiptNumber}</p>
-            </div>
-            <p>วันที่: ${new Date(receiptData.date).toLocaleDateString('th-TH')}</p>
-            <p>ได้รับเงินจาก: ${receiptData.patientName}</p>
+    // Receipt details
+    doc.text(`เลขที่: ${receiptData.receiptNumber}`, 170, 60, { align: 'right' });
+    doc.text(`วันที่: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, 20, 70);
+    doc.text(`ได้รับเงินจาก: ${receiptData.patientName}`, 20, 80);
 
-            <table>
-              <tr>
-                <th>รายการ</th>
-                <th class="amount-column">จำนวนเงิน</th>
-              </tr>
-              ${receiptData.items
-                .filter(item => item.amount > 0)
-                .map(item => `
-                  <tr>
-                    <td>${item.description}</td>
-                    <td class="amount-column">${item.amount.toLocaleString('th-TH')} บาท</td>
-                  </tr>
-                `).join('')}
-            </table>
+    // Table header
+    doc.line(20, 90, 190, 90);
+    doc.text('รายการ', 20, 95);
+    doc.text('จำนวนเงิน', 170, 95, { align: 'right' });
+    doc.line(20, 100, 190, 100);
 
-            <div class="amount">
-              <p>จำนวนเงินรวมทั้งสิ้น: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท</p>
-            </div>
-          </div>
-
-          <div class="signature">
-            <p>ผู้รับเงิน ............................................</p>
-            <p>วันที่ ${new Date().toLocaleDateString('th-TH')}</p>
-          </div>
-        </body>
-      </html>
-    `
-
-    console.log('HTML content generated')
-
-    // Set content and generate PDF
-    await page.setContent(htmlContent)
-    console.log('Content set to page')
-
-    const pdf = await page.pdf({ 
-      format: 'A4',
-      printBackground: true,
-      margin: {
-        top: '20mm',
-        right: '20mm',
-        bottom: '20mm',
-        left: '20mm'
+    // Table content
+    let yPos = 110;
+    receiptData.items.forEach((item) => {
+      if (item.amount > 0) {
+        doc.text(item.description, 20, yPos);
+        doc.text(`${item.amount.toLocaleString('th-TH')} บาท`, 170, yPos, { align: 'right' });
+        yPos += 10;
       }
-    })
+    });
 
-    console.log('PDF generated successfully')
+    // Total
+    doc.rect(20, yPos, 170, 20);
+    doc.text(`จำนวนเงินรวมทั้งสิ้น: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท`, 105, yPos + 10, { align: 'center' });
 
-    // Close browser
-    await browser.close()
-    console.log('Browser closed')
+    // Signature
+    doc.text('ผู้รับเงิน ............................................', 170, yPos + 50, { align: 'right' });
+    doc.text(`วันที่ ${format(new Date(), 'd MMMM yyyy', { locale: th })}`, 170, yPos + 60, { align: 'right' });
 
     // Convert PDF to base64
-    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdf)))
-    console.log('PDF converted to base64')
+    const pdfOutput = doc.output('arraybuffer');
+    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfOutput)));
+    console.log('PDF generated successfully');
 
     return new Response(
       JSON.stringify({ pdf: base64Pdf }),
@@ -154,7 +83,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error generating receipt:', error)
+    console.error('Error generating receipt:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
