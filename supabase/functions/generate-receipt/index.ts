@@ -38,7 +38,7 @@ serve(async (req) => {
     const page = await browser.newPage()
     console.log('Browser launched successfully')
 
-    const amountInWords = convertToThaiText(receiptData.amount)
+    const amountInWords = convertToThaiText(receiptData.totalAmount)
 
     // Generate HTML content
     const htmlContent = `
@@ -81,6 +81,9 @@ serve(async (req) => {
               text-align: left;
               border-bottom: 1px solid #ddd;
             }
+            .amount-column {
+              text-align: right;
+            }
           </style>
         </head>
         <body>
@@ -100,16 +103,20 @@ serve(async (req) => {
             <table>
               <tr>
                 <th>รายการ</th>
-                <th style="text-align: right;">จำนวนเงิน</th>
+                <th class="amount-column">จำนวนเงิน</th>
               </tr>
-              <tr>
-                <td>ค่าบริการทางการแพทย์</td>
-                <td style="text-align: right;">${receiptData.amount.toLocaleString('th-TH')} บาท</td>
-              </tr>
+              ${receiptData.items
+                .filter(item => item.amount > 0)
+                .map(item => `
+                  <tr>
+                    <td>${item.description}</td>
+                    <td class="amount-column">${item.amount.toLocaleString('th-TH')} บาท</td>
+                  </tr>
+                `).join('')}
             </table>
 
             <div class="amount">
-              <p>จำนวนเงินรวมทั้งสิ้น: ${receiptData.amount.toLocaleString('th-TH')} บาท</p>
+              <p>จำนวนเงินรวมทั้งสิ้น: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท</p>
               <p>(${amountInWords})</p>
             </div>
           </div>

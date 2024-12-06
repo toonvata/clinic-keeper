@@ -1,18 +1,25 @@
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
+interface ReceiptItem {
+  description: string;
+  amount: number;
+}
+
 interface ReceiptPreviewProps {
   receiptNumber: string;
   patientName: string;
   date: Date;
-  amount: number;
+  items: ReceiptItem[];
+  totalAmount: number;
 }
 
 const ReceiptPreview = ({
   receiptNumber,
   patientName,
   date,
-  amount,
+  items,
+  totalAmount,
 }: ReceiptPreviewProps) => {
   return (
     <div className="p-8 bg-white">
@@ -26,9 +33,7 @@ const ReceiptPreview = ({
 
       <div className="space-y-4">
         <p>เลขที่: {receiptNumber}</p>
-        <p>
-          วันที่: {format(date, "d MMMM yyyy", { locale: th })}
-        </p>
+        <p>วันที่: {format(date, "d MMMM yyyy", { locale: th })}</p>
         <p>ได้รับเงินจาก: {patientName}</p>
 
         <table className="w-full mt-4">
@@ -39,19 +44,21 @@ const ReceiptPreview = ({
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td className="py-2">ค่าบริการทางการแพทย์</td>
-              <td className="text-right py-2">
-                {amount.toLocaleString("th-TH")} บาท
-              </td>
-            </tr>
+            {items.map((item, index) => (
+              item.amount > 0 && (
+                <tr key={index}>
+                  <td className="py-2">{item.description}</td>
+                  <td className="text-right py-2">
+                    {item.amount.toLocaleString("th-TH")} บาท
+                  </td>
+                </tr>
+              )
+            ))}
           </tbody>
         </table>
 
         <div className="border p-4 mt-4 text-center">
-          <p>
-            จำนวนเงินรวมทั้งสิ้น: {amount.toLocaleString("th-TH")} บาท
-          </p>
+          <p>จำนวนเงินรวมทั้งสิ้น: {totalAmount.toLocaleString("th-TH")} บาท</p>
         </div>
       </div>
 
