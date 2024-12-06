@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { CalendarIcon, FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import PreviewDialog from "./PreviewDialog";
+import MedicalCertificatePreview from "./MedicalCertificatePreview";
 
 interface MedicalCertificateFormProps {
   patient: Patient;
@@ -25,6 +27,23 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [diagnosis, setDiagnosis] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [doctorName, setDoctorName] = useState("");
+
+  const handleDoctorSelect = async (id: number) => {
+    setSelectedDoctorId(id);
+    try {
+      const { data, error } = await supabase
+        .from('doctors')
+        .select('name')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      if (data) setDoctorName(data.name);
+    } catch (error) {
+      console.error('Error fetching doctor name:', error);
+    }
+  };
 
   const handlePreview = () => {
     if (!selectedDoctorId) {
@@ -49,15 +68,6 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
     }
 
     try {
-      // Get doctor name
-      const { data: doctorData, error: doctorError } = await supabase
-        .from('doctors')
-        .select('name')
-        .eq('id', selectedDoctorId)
-        .single();
-
-      if (doctorError) throw doctorError;
-
       // Calculate rest days if both start and end dates are set
       let restDays = 0;
       if (startDate && endDate) {
@@ -70,7 +80,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       const certificateData = {
         certificateNumber,
         patientName: `${patient.firstName} ${patient.lastName}`,
-        doctorName: doctorData.name,
+        doctorName,
         visitDate: visitDate.toISOString(),
         startDate: startDate?.toISOString(),
         endDate: endDate?.toISOString(),
@@ -78,27 +88,14 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         diagnosis
       };
 
-      // Call the Edge Function to generate PDF
-      const response = await fetch(
-        'https://qezunutqfumuzloarrti.supabase.co/functions/v1/generate-medical-certificate',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ certificateData })
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('generate-medical-certificate', {
+        body: { certificateData }
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
-      }
+      if (error) throw error;
 
-      // Get the PDF blob from the response
-      const pdfBlob = await response.blob();
-      
-      // Create a URL for the blob
+      // Create object URL from base64 PDF
+      const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
       const pdfUrl = URL.createObjectURL(pdfBlob);
 
       // Save certificate data to database
@@ -140,11 +137,11 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>เลขที่</Label>
-          <Input value="MC-2024-0001" readOnly />
+          <Input value={`MC-${new Date().getFullYear()}-XXXX`} readOnly />
         </div>
         <DoctorSelect
           selectedDoctorId={selectedDoctorId}
-          onDoctorSelect={setSelectedDoctorId}
+          onDoctorSelect={handleDoctorSelect}
         />
       </div>
 
@@ -247,6 +244,27 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
           พิมพ์เอกสาร
         </Button>
       </div>
+
+      <PreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title="ตัวอย่างใบรับรองแพทย์"
+      >
+        <MedicalCertificatePreview
+          certificateNumber={`MC-${new Date().getFullYear()}-XXXX`}
+          doctorName={doctorName}
+          patientName={`${patient.firstName} ${patient.lastName}`}
+          visitDate={visitDate}
+          startDate={startDate}
+          endDate={endDate}
+          restDays={
+            startDate && endDate
+              ? Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1
+              : undefined
+          }
+          diagnosis={diagnosis}
+        />
+      </PreviewDialog>
     </div>
   );
 };

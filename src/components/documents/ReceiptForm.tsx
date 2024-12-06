@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon, FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import PreviewDialog from "./PreviewDialog";
+import ReceiptPreview from "./ReceiptPreview";
 
 interface ReceiptFormProps {
   patient: Patient;
@@ -53,27 +56,14 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         amount: parseFloat(amount)
       };
 
-      // Call the Edge Function to generate PDF
-      const response = await fetch(
-        'https://qezunutqfumuzloarrti.supabase.co/functions/v1/generate-receipt',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ receiptData })
-        }
-      );
+      const { data, error } = await supabase.functions.invoke('generate-receipt', {
+        body: { receiptData }
+      });
 
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF');
-      }
+      if (error) throw error;
 
-      // Get the PDF blob from the response
-      const pdfBlob = await response.blob();
-      
-      // Create a URL for the blob
+      // Create object URL from base64 PDF
+      const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
       const pdfUrl = URL.createObjectURL(pdfBlob);
       
       // Open PDF in new tab
@@ -98,7 +88,7 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>เลขที่</Label>
-          <Input value="REC-2024-0001" readOnly />
+          <Input value={`REC-${new Date().getFullYear()}-XXXX`} readOnly />
         </div>
         <div className="space-y-2">
           <Label>วันที่</Label>
@@ -147,6 +137,19 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
           พิมพ์เอกสาร
         </Button>
       </div>
+
+      <PreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        title="ตัวอย่างใบเสร็จรับเงิน"
+      >
+        <ReceiptPreview
+          receiptNumber={`REC-${new Date().getFullYear()}-XXXX`}
+          patientName={`${patient.firstName} ${patient.lastName}`}
+          date={date}
+          amount={parseFloat(amount) || 0}
+        />
+      </PreviewDialog>
     </div>
   );
 };

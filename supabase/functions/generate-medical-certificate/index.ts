@@ -27,6 +27,10 @@ serve(async (req) => {
           <meta charset="UTF-8">
           <title>ใบรับรองแพทย์</title>
           <style>
+            @font-face {
+              font-family: 'Sarabun';
+              src: url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+            }
             body { 
               font-family: 'Sarabun', sans-serif;
               padding: 40px;
@@ -43,10 +47,6 @@ serve(async (req) => {
             .signature {
               text-align: right;
               margin-top: 50px;
-            }
-            .logo {
-              max-width: 150px;
-              margin-bottom: 20px;
             }
           </style>
         </head>
@@ -96,18 +96,19 @@ serve(async (req) => {
       }
     })
 
-    // Upload PDF to storage
-    const timestamp = new Date().getTime()
-    const filePath = `medical-certificates/${certificateData.certificateNumber}_${timestamp}.pdf`
-    
-    // Return the PDF directly in the response
-    return new Response(pdf, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${certificateData.certificateNumber}.pdf"`
+    // Convert PDF to base64
+    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdf)));
+
+    // Return the PDF as base64
+    return new Response(
+      JSON.stringify({ pdf: base64Pdf }),
+      { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    })
+    )
   } catch (error) {
     console.error('Error generating medical certificate:', error)
     return new Response(

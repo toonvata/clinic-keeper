@@ -6,6 +6,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+function convertToThaiText(number: number): string {
+  const units = ['', 'หนึ่ง', 'สอง',  'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า', 'สิบ']
+  const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
+  
+  let text = ''
+  const numberStr = Math.floor(number).toString()
+  
+  for (let i = 0; i < numberStr.length; i++) {
+    const digit = parseInt(numberStr[i])
+    if (digit !== 0) {
+      text += units[digit] + positions[numberStr.length - i - 1]
+    }
+  }
+  
+  return text + 'บาทถ้วน'
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -19,7 +36,6 @@ serve(async (req) => {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
 
-    // Convert amount to Thai Baht text
     const amountInWords = convertToThaiText(receiptData.amount)
 
     // Generate HTML content
@@ -30,6 +46,10 @@ serve(async (req) => {
           <meta charset="UTF-8">
           <title>ใบเสร็จรับเงิน</title>
           <style>
+            @font-face {
+              font-family: 'Sarabun';
+              src: url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
+            }
             body { 
               font-family: 'Sarabun', sans-serif;
               padding: 40px;
@@ -53,12 +73,10 @@ serve(async (req) => {
               text-align: right;
               margin-top: 50px;
             }
-            .patient-info {
-              margin: 20px 0;
-            }
             table {
               width: 100%;
               border-collapse: collapse;
+              margin: 20px 0;
             }
             th, td {
               padding: 8px;
@@ -79,19 +97,16 @@ serve(async (req) => {
           <div class="content">
             <p>เลขที่: ${receiptData.receiptNumber}</p>
             <p>วันที่: ${new Date(receiptData.date).toLocaleDateString('th-TH')}</p>
-
-            <div class="patient-info">
-              <p>ได้รับเงินจาก: ${receiptData.patientName}</p>
-            </div>
+            <p>ได้รับเงินจาก: ${receiptData.patientName}</p>
 
             <table>
               <tr>
                 <th>รายการ</th>
-                <th>จำนวนเงิน</th>
+                <th style="text-align: right;">จำนวนเงิน</th>
               </tr>
               <tr>
                 <td>ค่าบริการทางการแพทย์</td>
-                <td>${receiptData.amount.toLocaleString('th-TH')} บาท</td>
+                <td style="text-align: right;">${receiptData.amount.toLocaleString('th-TH')} บาท</td>
               </tr>
             </table>
 
@@ -122,14 +137,19 @@ serve(async (req) => {
       }
     })
 
-    // Return the PDF directly in the response
-    return new Response(pdf, {
-      headers: {
-        ...corsHeaders,
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${receiptData.receiptNumber}.pdf"`
+    // Convert PDF to base64
+    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdf)));
+
+    // Return the PDF as base64
+    return new Response(
+      JSON.stringify({ pdf: base64Pdf }),
+      { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
-    })
+    )
   } catch (error) {
     console.error('Error generating receipt:', error)
     return new Response(
@@ -138,21 +158,3 @@ serve(async (req) => {
     )
   }
 })
-
-// Helper function to convert numbers to Thai text
-function convertToThaiText(number: number): string {
-  const units = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า', 'สิบ']
-  const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
-  
-  let text = ''
-  const numberStr = Math.floor(number).toString()
-  
-  for (let i = 0; i < numberStr.length; i++) {
-    const digit = parseInt(numberStr[i])
-    if (digit !== 0) {
-      text += units[digit] + positions[numberStr.length - i - 1]
-    }
-  }
-  
-  return text + 'บาทถ้วน'
-}
