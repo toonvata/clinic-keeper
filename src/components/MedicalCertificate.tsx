@@ -32,6 +32,10 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
     window.print();
   };
 
+  if (!selectedPatient) {
+    return null;
+  }
+
   return (
     <div className="space-y-6 print:p-8">
       <div className="text-center print:text-left space-y-2">

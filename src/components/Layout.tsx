@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { LogOut } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -175,7 +176,15 @@ const Layout = () => {
 
         <TabsContent value="medical-cert">
           <h2 className="text-2xl font-semibold mb-4 text-left">ใบรับรองแพทย์</h2>
-          <MedicalCertificate selectedPatient={selectedPatient} />
+          {selectedPatient ? (
+            <MedicalCertificate selectedPatient={selectedPatient} />
+          ) : (
+            <Alert>
+              <AlertDescription>
+                กรุณาเลือกผู้ป่วยจากรายการผู้ป่วยก่อนออกใบรับรองแพทย์
+              </AlertDescription>
+            </Alert>
+          )}
         </TabsContent>
 
         <TabsContent value="dashboard">
