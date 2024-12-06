@@ -16,8 +16,10 @@ serve(async (req) => {
     const { receiptData } = await req.json()
     console.log('Received receipt data:', receiptData)
 
-    // Launch browser
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
+    // Launch browser with specific configuration for Deno environment
+    const browser = await puppeteer.default.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    })
     const page = await browser.newPage()
     console.log('Browser launched successfully')
 
