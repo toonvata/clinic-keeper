@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Patient } from "@/types";
-import { Alert, AlertDescription } from "./ui/alert";
 import { Card, CardContent } from "./ui/card";
 import { Button } from "@/components/ui/button";
 import { PatientSearch } from "./treatment/PatientSearch";
@@ -85,7 +84,7 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
             onPatientSelect={handlePatientSelect}
           />
 
-          {currentPatient ? (
+          {currentPatient && (
             <>
               <CertificateForm
                 selectedPatient={currentPatient}
@@ -120,12 +119,6 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
                 </Button>
               </div>
             </>
-          ) : (
-            <Alert>
-              <AlertDescription>
-                กรุณาค้นหาและเลือกผู้ป่วยเพื่อออกใบรับรองแพทย์
-              </AlertDescription>
-            </Alert>
           )}
         </CardContent>
       </Card>
