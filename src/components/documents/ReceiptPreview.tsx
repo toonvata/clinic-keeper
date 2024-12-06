@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import { convertToThaiText } from "@/utils/thaiNumberToText";
 
 interface ReceiptItem {
   description: string;
@@ -57,8 +58,9 @@ const ReceiptPreview = ({
           </tbody>
         </table>
 
-        <div className="border p-4 mt-4 text-center">
-          <p>จำนวนเงินรวมทั้งสิ้น: {totalAmount.toLocaleString("th-TH")} บาท</p>
+        <div className="border p-4 mt-4">
+          <p className="text-center">จำนวนเงินรวมทั้งสิ้น: {totalAmount.toLocaleString("th-TH")} บาท</p>
+          <p className="text-center mt-2">({convertToThaiText(totalAmount)})</p>
         </div>
       </div>
 
