@@ -1,0 +1,7 @@
+project_id = "qezunutqfumuzloarrti"
+
+[functions.generate-medical-certificate]
+verify_jwt = false
+
+[functions.generate-receipt]
+verify_jwt = false

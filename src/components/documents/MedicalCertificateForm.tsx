@@ -64,7 +64,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         restDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       }
 
-      // Generate certificate number (you might want to implement a more sophisticated system)
+      // Generate certificate number
       const certificateNumber = `MC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
 
       const certificateData = {
@@ -95,7 +95,11 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         throw new Error('Failed to generate PDF');
       }
 
-      const { pdfUrl } = await response.json();
+      // Get the PDF blob from the response
+      const pdfBlob = await response.blob();
+      
+      // Create a URL for the blob
+      const pdfUrl = URL.createObjectURL(pdfBlob);
 
       // Save certificate data to database
       const { error: insertError } = await supabase

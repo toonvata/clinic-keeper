@@ -42,11 +42,55 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
       return;
     }
 
-    // TODO: Implement print functionality
-    toast({
-      title: "กำลังพิมพ์เอกสาร",
-      description: "ระบบกำลังสร้างไฟล์ PDF กรุณารอสักครู่",
-    });
+    try {
+      // Generate receipt number
+      const receiptNumber = `REC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
+
+      const receiptData = {
+        receiptNumber,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        date: date.toISOString(),
+        amount: parseFloat(amount)
+      };
+
+      // Call the Edge Function to generate PDF
+      const response = await fetch(
+        'https://qezunutqfumuzloarrti.supabase.co/functions/v1/generate-receipt',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({ receiptData })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      // Get the PDF blob from the response
+      const pdfBlob = await response.blob();
+      
+      // Create a URL for the blob
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      
+      // Open PDF in new tab
+      window.open(pdfUrl, '_blank');
+
+      toast({
+        title: "พิมพ์เอกสารสำเร็จ",
+        description: "ระบบได้สร้างไฟล์ PDF เรียบร้อยแล้ว",
+      });
+    } catch (error) {
+      console.error('Error generating receipt:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถสร้างใบเสร็จรับเงินได้ กรุณาลองใหม่อีกครั้ง",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
