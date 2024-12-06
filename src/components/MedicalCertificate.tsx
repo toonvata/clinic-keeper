@@ -128,19 +128,21 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
         <Button onClick={handlePrint} className="w-full">พิมพ์ใบรับรองแพทย์</Button>
       </div>
 
-      <style jsx global>{`
-        @media print {
-          body * {
-            visibility: hidden;
+      <style>
+        {`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .print\\:p-8, .print\\:p-8 * {
+              visibility: visible;
+            }
+            .print\\:hidden {
+              display: none;
+            }
           }
-          .print\\:p-8, .print\\:p-8 * {
-            visibility: visible;
-          }
-          .print\\:hidden {
-            display: none;
-          }
-        }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
