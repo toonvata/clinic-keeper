@@ -141,6 +141,50 @@ export type Database = {
         }
         Relationships: []
       }
+      receipts: {
+        Row: {
+          created_at: string
+          date: string
+          id: number
+          medical_service_amount: number | null
+          medication_amount: number | null
+          patient_hn: string | null
+          procedure_amount: number | null
+          receipt_number: string
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: never
+          medical_service_amount?: number | null
+          medication_amount?: number | null
+          patient_hn?: string | null
+          procedure_amount?: number | null
+          receipt_number: string
+          total_amount: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: never
+          medical_service_amount?: number | null
+          medication_amount?: number | null
+          patient_hn?: string | null
+          procedure_amount?: number | null
+          receipt_number?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receipts_patient_hn_fkey"
+            columns: ["patient_hn"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["hn"]
+          },
+        ]
+      }
       treatments: {
         Row: {
           blood_pressure: string | null

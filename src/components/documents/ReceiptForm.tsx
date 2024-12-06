@@ -3,15 +3,13 @@ import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon, FileText, Eye } from "lucide-react";
+import { FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import PreviewDialog from "./PreviewDialog";
 import ReceiptPreview from "./ReceiptPreview";
+import ReceiptFormInputs from "./receipt/ReceiptFormInputs";
+import ReceiptDatePicker from "./receipt/ReceiptDatePicker";
 
 interface ReceiptFormProps {
   patient: Patient;
@@ -92,58 +90,58 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
     setIsGenerating(true);
 
     try {
-      // Generate receipt number
-      const receiptNumber = `REC-${new Date().getFullYear()}-${Math.floor(
-        Math.random() * 10000
-      )
-        .toString()
-        .padStart(4, "0")}`;
+      // Save receipt data to database first
+      const { error: insertError } = await supabase
+        .from('receipts')
+        .insert({
+          receipt_number: receiptNumber,
+          patient_hn: patient.hn,
+          date: date.toISOString(),
+          medical_service_amount: parseFloat(medicalServiceAmount || "0"),
+          procedure_amount: parseFloat(procedureAmount || "0"),
+          medication_amount: parseFloat(medicationAmount || "0"),
+          total_amount: getTotalAmount()
+        });
 
-      const receiptData = {
-        receiptNumber,
-        patientName: `${patient.firstName} ${patient.lastName}`,
-        date: date.toISOString(),
-        items: [
-          {
-            description: "ค่าบริการทางการแพทย์",
-            amount: parseFloat(medicalServiceAmount || "0"),
-          },
-          {
-            description: "ค่าหัตถการเพื่อการรักษา",
-            amount: parseFloat(procedureAmount || "0"),
-          },
-          {
-            description: "ค่ายาและเวชภัณฑ์",
-            amount: parseFloat(medicationAmount || "0"),
-          },
-        ],
-        totalAmount: getTotalAmount(),
-      };
+      if (insertError) throw insertError;
 
-      console.log("Sending receipt data:", receiptData);
-
+      // Generate PDF using edge function
       const { data, error } = await supabase.functions.invoke("generate-receipt", {
-        body: { receiptData },
+        body: {
+          receiptData: {
+            receiptNumber,
+            patientName: `${patient.firstName} ${patient.lastName}`,
+            date: date.toISOString(),
+            items: [
+              {
+                description: "ค่าบริการทางการแพทย์",
+                amount: parseFloat(medicalServiceAmount || "0"),
+              },
+              {
+                description: "ค่าหัตถการเพื่อการรักษา",
+                amount: parseFloat(procedureAmount || "0"),
+              },
+              {
+                description: "ค่ายาและเวชภัณฑ์",
+                amount: parseFloat(medicationAmount || "0"),
+              },
+            ],
+            totalAmount: getTotalAmount(),
+          },
+        },
       });
 
-      if (error) {
-        console.error("Error from edge function:", error);
-        throw error;
-      }
+      if (error) throw error;
 
       if (!data?.pdf) {
         throw new Error("No PDF data received from the server");
       }
-
-      console.log("Received PDF data from server");
 
       // Create object URL from base64 PDF
       const pdfBlob = await fetch(
         `data:application/pdf;base64,${data.pdf}`
       ).then((res) => res.blob());
       const pdfUrl = URL.createObjectURL(pdfBlob);
-
-      console.log("Created PDF URL:", pdfUrl);
 
       // Open PDF in new tab
       window.open(pdfUrl, "_blank");
@@ -152,6 +150,12 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         title: "พิมพ์เอกสารสำเร็จ",
         description: "ระบบได้สร้างไฟล์ PDF เรียบร้อยแล้ว",
       });
+
+      // Reset form
+      setMedicalServiceAmount("");
+      setProcedureAmount("");
+      setMedicationAmount("");
+      fetchLatestReceiptNumber();
     } catch (error) {
       console.error("Error generating receipt:", error);
       toast({
@@ -169,76 +173,23 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>เลขที่</Label>
-          <Input
-            value={receiptNumber}
-            readOnly
-            className="text-right"
-          />
+          <Input value={receiptNumber} readOnly className="text-right" />
         </div>
         <div className="space-y-2">
           <Label>วันที่</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "dd/MM/yyyy") : "เลือกวันที่"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(date) => date && setDate(date)}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <ReceiptDatePicker date={date} setDate={setDate} />
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>ค่าบริการทางการแพทย์</Label>
-          <Input
-            type="number"
-            value={medicalServiceAmount}
-            onChange={(e) => setMedicalServiceAmount(e.target.value)}
-            placeholder="0.00"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>ค่าหัตถการเพื่อการรักษา</Label>
-          <Input
-            type="number"
-            value={procedureAmount}
-            onChange={(e) => setProcedureAmount(e.target.value)}
-            placeholder="0.00"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>ค่ายาและเวชภัณฑ์</Label>
-          <Input
-            type="number"
-            value={medicationAmount}
-            onChange={(e) => setMedicationAmount(e.target.value)}
-            placeholder="0.00"
-          />
-        </div>
-
-        <div className="pt-4 border-t">
-          <div className="text-right font-semibold">
-            รวมทั้งสิ้น: {getTotalAmount().toLocaleString("th-TH")} บาท
-          </div>
-        </div>
-      </div>
+      <ReceiptFormInputs
+        medicalServiceAmount={medicalServiceAmount}
+        setMedicalServiceAmount={setMedicalServiceAmount}
+        procedureAmount={procedureAmount}
+        setProcedureAmount={setProcedureAmount}
+        medicationAmount={medicationAmount}
+        setMedicationAmount={setMedicationAmount}
+        getTotalAmount={getTotalAmount}
+      />
 
       <div className="flex justify-end space-x-2">
         <Button variant="outline" onClick={handlePreview}>
@@ -257,7 +208,7 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         title="ตัวอย่างใบเสร็จรับเงิน"
       >
         <ReceiptPreview
-          receiptNumber={`REC-${new Date().getFullYear()}-XXXX`}
+          receiptNumber={receiptNumber}
           patientName={`${patient.firstName} ${patient.lastName}`}
           date={date}
           items={[
