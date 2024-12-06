@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, History, Trash2, FileText } from "lucide-react";
+import { Search, History, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -20,7 +20,6 @@ interface PatientListProps {
   treatments: Treatment[];
   onDeletePatient: (hn: string) => void;
   onTreatmentClick: (patient: Patient) => void;
-  onMedicalCertClick: (patient: Patient) => void;
 }
 
 const PatientList = ({ 
@@ -28,7 +27,6 @@ const PatientList = ({
   treatments, 
   onDeletePatient,
   onTreatmentClick,
-  onMedicalCertClick
 }: PatientListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -61,10 +59,6 @@ const PatientList = ({
       name: `${patient.firstName} ${patient.lastName}`,
     });
     setShowHistory(true);
-  };
-
-  const handleMedicalCertificate = (patient: Patient) => {
-    onMedicalCertClick(patient);
   };
 
   const getPatientTreatments = (hn: string) => {
@@ -116,14 +110,6 @@ const PatientList = ({
                   >
                     <History className="h-4 w-4 mr-1" />
                     ประวัติการรักษา
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleMedicalCertificate(patient)}
-                  >
-                    <FileText className="h-4 w-4 mr-1" />
-                    ใบรับรองแพทย์
                   </Button>
                   <Button
                     variant="destructive"
