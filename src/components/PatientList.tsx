@@ -62,11 +62,7 @@ const PatientList = ({
   };
 
   const handleMedicalCertificate = (patient: Patient) => {
-    onTreatmentClick(patient); // This sets the selectedPatient in Layout
-    const tabElement = document.querySelector('[value="medical-cert"]') as HTMLElement;
-    if (tabElement) {
-      tabElement.click();
-    }
+    onTreatmentClick(patient);
   };
 
   const getPatientTreatments = (hn: string) => {

@@ -109,7 +109,7 @@ const Layout = () => {
 
   const handleTreatmentClick = (patient: Patient) => {
     setSelectedPatient(patient);
-    setActiveTab("treatments");
+    setActiveTab("medical-cert");
   };
 
   const handleLogout = async () => {
