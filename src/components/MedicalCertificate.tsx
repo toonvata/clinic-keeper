@@ -9,9 +9,10 @@ import { useQuery } from "@tanstack/react-query";
 import { PatientSearch } from "./treatment/PatientSearch";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Card, CardContent } from "./ui/card";
+import { Patient } from "@/types";
 
 interface MedicalCertificateProps {
-  selectedPatient?: any;
+  selectedPatient?: Patient;
 }
 
 const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertificateProps) => {
@@ -40,13 +41,28 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
     queryFn: async () => {
       const { data, error } = await supabase.from("patients").select("*");
       if (error) throw error;
-      return data;
+      
+      // Transform the raw data to match our Patient interface
+      return data?.map(p => ({
+        hn: p.hn,
+        registrationDate: new Date(p.registration_date),
+        firstName: p.first_name,
+        lastName: p.last_name,
+        birthDate: new Date(p.birth_date),
+        age: p.age,
+        idNumber: p.id_number,
+        occupation: p.occupation || '',
+        address: p.address,
+        phoneNumber: p.phone_number,
+        underlyingDiseases: p.underlying_diseases || '',
+        drugAllergies: p.drug_allergies || ''
+      })) as Patient[];
     },
   });
 
   const selectedDoctorData = doctors?.find(d => d.id.toString() === selectedDoctor);
 
-  const handlePatientSelect = (patient: any) => {
+  const handlePatientSelect = (patient: Patient) => {
     setCurrentPatient(patient);
     setShowSearch(false);
   };
