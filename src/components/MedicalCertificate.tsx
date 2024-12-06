@@ -6,13 +6,18 @@ import { format } from "date-fns";
 import { CertificateForm } from "./medical-certificate/CertificateForm";
 import { CertificatePreview } from "./medical-certificate/CertificatePreview";
 import { useQuery } from "@tanstack/react-query";
+import { PatientSearch } from "./treatment/PatientSearch";
+import { Alert, AlertDescription } from "./ui/alert";
+import { Card, CardContent } from "./ui/card";
 
 interface MedicalCertificateProps {
-  selectedPatient: any;
+  selectedPatient?: any;
 }
 
-const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
+const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertificateProps) => {
   const { toast } = useToast();
+  const [showSearch, setShowSearch] = useState(!initialPatient);
+  const [currentPatient, setCurrentPatient] = useState(initialPatient || null);
   const [certificateNumber, setCertificateNumber] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState("");
   const [visitDate, setVisitDate] = useState(format(new Date(), "yyyy-MM-dd"));
@@ -30,7 +35,21 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
     },
   });
 
+  const { data: patients } = useQuery({
+    queryKey: ["patients"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("patients").select("*");
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const selectedDoctorData = doctors?.find(d => d.id.toString() === selectedDoctor);
+
+  const handlePatientSelect = (patient: any) => {
+    setCurrentPatient(patient);
+    setShowSearch(false);
+  };
 
   const handleSaveAndPrint = async () => {
     if (!selectedDoctor || !certificateNumber) {
@@ -49,7 +68,7 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
         .from('medical_certificates')
         .insert({
           certificate_number: certificateNumber,
-          patient_hn: selectedPatient.hn,
+          patient_hn: currentPatient.hn,
           doctor_id: parseInt(selectedDoctor),
           visit_date: new Date(visitDate).toISOString(),
           start_date: startDate ? new Date(startDate).toISOString() : null,
@@ -65,7 +84,7 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
           certificateData: {
             certificateNumber,
             doctorName: selectedDoctorData ? `${selectedDoctorData.title}${selectedDoctorData.name}` : '',
-            patientName: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
+            patientName: `${currentPatient.firstName} ${currentPatient.lastName}`,
             visitDate,
             startDate,
             endDate,
@@ -104,42 +123,66 @@ const MedicalCertificate = ({ selectedPatient }: MedicalCertificateProps) => {
     }
   };
 
-  if (!selectedPatient) {
-    return null;
+  if (!patients) {
+    return <div>Loading...</div>;
   }
 
   return (
-    <div className="space-y-6 print:p-8">
-      <CertificateForm
-        selectedPatient={selectedPatient}
-        certificateNumber={certificateNumber}
-        selectedDoctor={selectedDoctor}
-        visitDate={visitDate}
-        startDate={startDate}
-        endDate={endDate}
-        restDays={restDays}
-        onCertificateNumberChange={setCertificateNumber}
-        onDoctorChange={setSelectedDoctor}
-        onVisitDateChange={setVisitDate}
-        onStartDateChange={setStartDate}
-        onEndDateChange={setEndDate}
-        onRestDaysChange={setRestDays}
-      />
+    <div className="space-y-6">
+      <Card>
+        <CardContent className="pt-6">
+          <PatientSearch
+            showSearch={showSearch}
+            setShowSearch={setShowSearch}
+            selectedPatient={currentPatient}
+            patients={patients}
+            onPatientSelect={handlePatientSelect}
+          />
 
-      <CertificatePreview
-        selectedPatient={selectedPatient}
-        selectedDoctorData={selectedDoctorData}
-      />
+          {currentPatient ? (
+            <>
+              <CertificateForm
+                selectedPatient={currentPatient}
+                certificateNumber={certificateNumber}
+                selectedDoctor={selectedDoctor}
+                visitDate={visitDate}
+                startDate={startDate}
+                endDate={endDate}
+                restDays={restDays}
+                onCertificateNumberChange={setCertificateNumber}
+                onDoctorChange={setSelectedDoctor}
+                onVisitDateChange={setVisitDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+                onRestDaysChange={setRestDays}
+              />
 
-      <div className="print:hidden">
-        <Button 
-          onClick={handleSaveAndPrint} 
-          className="w-full"
-          disabled={isGenerating}
-        >
-          {isGenerating ? "กำลังสร้างใบรับรองแพทย์..." : "บันทึกและพิมพ์ใบรับรองแพทย์"}
-        </Button>
-      </div>
+              <div className="mt-6">
+                <CertificatePreview
+                  selectedPatient={currentPatient}
+                  selectedDoctorData={selectedDoctorData}
+                />
+              </div>
+
+              <div className="mt-6">
+                <Button 
+                  onClick={handleSaveAndPrint} 
+                  className="w-full"
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? "กำลังสร้างใบรับรองแพทย์..." : "บันทึกและพิมพ์ใบรับรองแพทย์"}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <Alert>
+              <AlertDescription>
+                กรุณาค้นหาและเลือกผู้ป่วยเพื่อออกใบรับรองแพทย์
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       <style>
         {`
