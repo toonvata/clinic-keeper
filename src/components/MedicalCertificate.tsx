@@ -50,8 +50,7 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
       const { data, error } = await supabase.from("patients").select("*");
       if (error) throw error;
       
-      // Transform the raw data to match our Patient interface
-      return data?.map(p => ({
+      return data.map(p => ({
         hn: p.hn,
         registrationDate: new Date(p.registration_date),
         firstName: p.first_name,
