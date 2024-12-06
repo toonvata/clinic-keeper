@@ -20,13 +20,15 @@ interface PatientListProps {
   treatments: Treatment[];
   onDeletePatient: (hn: string) => void;
   onTreatmentClick: (patient: Patient) => void;
+  onMedicalCertClick: (patient: Patient) => void;
 }
 
 const PatientList = ({ 
   patients, 
   treatments, 
   onDeletePatient,
-  onTreatmentClick 
+  onTreatmentClick,
+  onMedicalCertClick
 }: PatientListProps) => {
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState("");
@@ -62,7 +64,7 @@ const PatientList = ({
   };
 
   const handleMedicalCertificate = (patient: Patient) => {
-    onTreatmentClick(patient);
+    onMedicalCertClick(patient);
   };
 
   const getPatientTreatments = (hn: string) => {

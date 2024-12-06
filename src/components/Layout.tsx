@@ -109,6 +109,11 @@ const Layout = () => {
 
   const handleTreatmentClick = (patient: Patient) => {
     setSelectedPatient(patient);
+    setActiveTab("treatments");
+  };
+
+  const handleMedicalCertClick = (patient: Patient) => {
+    setSelectedPatient(patient);
     setActiveTab("medical-cert");
   };
 
@@ -161,6 +166,7 @@ const Layout = () => {
             treatments={treatments}
             onDeletePatient={handleDeletePatient}
             onTreatmentClick={handleTreatmentClick}
+            onMedicalCertClick={handleMedicalCertClick}
           />
         </TabsContent>
 
