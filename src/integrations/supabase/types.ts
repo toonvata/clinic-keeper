@@ -33,6 +33,63 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_certificates: {
+        Row: {
+          certificate_number: string
+          created_at: string | null
+          diagnosis: string | null
+          doctor_id: number | null
+          end_date: string | null
+          id: number
+          patient_hn: string | null
+          pdf_url: string | null
+          rest_days: number | null
+          start_date: string | null
+          visit_date: string
+        }
+        Insert: {
+          certificate_number: string
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_id?: number | null
+          end_date?: string | null
+          id?: number
+          patient_hn?: string | null
+          pdf_url?: string | null
+          rest_days?: number | null
+          start_date?: string | null
+          visit_date: string
+        }
+        Update: {
+          certificate_number?: string
+          created_at?: string | null
+          diagnosis?: string | null
+          doctor_id?: number | null
+          end_date?: string | null
+          id?: number
+          patient_hn?: string | null
+          pdf_url?: string | null
+          rest_days?: number | null
+          start_date?: string | null
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_certificates_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_patient_hn_fkey"
+            columns: ["patient_hn"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["hn"]
+          },
+        ]
+      }
       patients: {
         Row: {
           address: string
