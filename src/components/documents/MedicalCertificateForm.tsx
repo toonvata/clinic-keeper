@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +29,39 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   const [showPreview, setShowPreview] = useState(false);
   const [doctorName, setDoctorName] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [certificateNumber, setCertificateNumber] = useState("");
+
+  useEffect(() => {
+    fetchLatestCertificateNumber();
+  }, []);
+
+  const fetchLatestCertificateNumber = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('medical_certificates')
+        .select('certificate_number')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      let nextNumber = 1;
+      if (data && data.length > 0) {
+        const lastNumber = parseInt(data[0].certificate_number.split('-')[2]);
+        nextNumber = lastNumber + 1;
+      }
+
+      const newCertificateNumber = `MC-${new Date().getFullYear()}-${nextNumber.toString().padStart(4, '0')}`;
+      setCertificateNumber(newCertificateNumber);
+    } catch (error) {
+      console.error('Error fetching latest certificate number:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดึงเลขที่ใบรับรองแพทย์ได้",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDoctorSelect = async (id: number) => {
     setSelectedDoctorId(id);
@@ -158,7 +191,11 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>เลขที่</Label>
-          <Input value={`MC-${new Date().getFullYear()}-XXXX`} readOnly />
+          <Input 
+            value={certificateNumber} 
+            readOnly 
+            className="text-right"
+          />
         </div>
         <DoctorSelect
           selectedDoctorId={selectedDoctorId}

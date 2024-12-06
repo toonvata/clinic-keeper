@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,39 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
   const [medicationAmount, setMedicationAmount] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [receiptNumber, setReceiptNumber] = useState("");
+
+  useEffect(() => {
+    fetchLatestReceiptNumber();
+  }, []);
+
+  const fetchLatestReceiptNumber = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('receipts')
+        .select('receipt_number')
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      let nextNumber = 1;
+      if (data && data.length > 0) {
+        const lastNumber = parseInt(data[0].receipt_number.split('-')[2]);
+        nextNumber = lastNumber + 1;
+      }
+
+      const newReceiptNumber = `REC-${new Date().getFullYear()}-${nextNumber.toString().padStart(4, '0')}`;
+      setReceiptNumber(newReceiptNumber);
+    } catch (error) {
+      console.error('Error fetching latest receipt number:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถดึงเลขที่ใบเสร็จได้",
+        variant: "destructive",
+      });
+    }
+  };
 
   const getTotalAmount = () => {
     return (
@@ -137,8 +170,9 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         <div className="space-y-2">
           <Label>เลขที่</Label>
           <Input
-            value={`REC-${new Date().getFullYear()}-XXXX`}
+            value={receiptNumber}
             readOnly
+            className="text-right"
           />
         </div>
         <div className="space-y-2">
