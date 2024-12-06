@@ -22,6 +22,7 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
   const [date, setDate] = useState<Date>(new Date());
   const [amount, setAmount] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handlePreview = () => {
     if (!amount) {
@@ -45,6 +46,8 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
       return;
     }
 
+    setIsGenerating(true);
+
     try {
       // Generate receipt number
       const receiptNumber = `REC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
@@ -56,15 +59,28 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         amount: parseFloat(amount)
       };
 
+      console.log('Sending receipt data:', receiptData);
+
       const { data, error } = await supabase.functions.invoke('generate-receipt', {
         body: { receiptData }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error from edge function:', error);
+        throw error;
+      }
+
+      if (!data?.pdf) {
+        throw new Error('No PDF data received from the server');
+      }
+
+      console.log('Received PDF data from server');
 
       // Create object URL from base64 PDF
       const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
       const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      console.log('Created PDF URL:', pdfUrl);
       
       // Open PDF in new tab
       window.open(pdfUrl, '_blank');
@@ -80,6 +96,8 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
         description: "ไม่สามารถสร้างใบเสร็จรับเงินได้ กรุณาลองใหม่อีกครั้ง",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -132,9 +150,9 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
           <Eye className="w-4 h-4 mr-2" />
           ดูตัวอย่าง
         </Button>
-        <Button onClick={handlePrint}>
+        <Button onClick={handlePrint} disabled={isGenerating}>
           <FileText className="w-4 h-4 mr-2" />
-          พิมพ์เอกสาร
+          {isGenerating ? "กำลังสร้างเอกสาร..." : "พิมพ์เอกสาร"}
         </Button>
       </div>
 

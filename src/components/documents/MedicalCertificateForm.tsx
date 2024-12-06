@@ -28,6 +28,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   const [diagnosis, setDiagnosis] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [doctorName, setDoctorName] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleDoctorSelect = async (id: number) => {
     setSelectedDoctorId(id);
@@ -67,6 +68,8 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       return;
     }
 
+    setIsGenerating(true);
+
     try {
       // Calculate rest days if both start and end dates are set
       let restDays = 0;
@@ -88,15 +91,28 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         diagnosis
       };
 
+      console.log('Sending certificate data:', certificateData);
+
       const { data, error } = await supabase.functions.invoke('generate-medical-certificate', {
         body: { certificateData }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error from edge function:', error);
+        throw error;
+      }
+
+      if (!data?.pdf) {
+        throw new Error('No PDF data received from the server');
+      }
+
+      console.log('Received PDF data from server');
 
       // Create object URL from base64 PDF
       const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
       const pdfUrl = URL.createObjectURL(pdfBlob);
+
+      console.log('Created PDF URL:', pdfUrl);
 
       // Save certificate data to database
       const { error: insertError } = await supabase
@@ -113,7 +129,10 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
           pdf_url: pdfUrl
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Error saving to database:', insertError);
+        throw insertError;
+      }
 
       // Open PDF in new tab
       window.open(pdfUrl, '_blank');
@@ -129,6 +148,8 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         description: "ไม่สามารถสร้างใบรับรองแพทย์ได้ กรุณาลองใหม่อีกครั้ง",
         variant: "destructive",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -239,9 +260,9 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
           <Eye className="w-4 h-4 mr-2" />
           ดูตัวอย่าง
         </Button>
-        <Button onClick={handlePrint}>
+        <Button onClick={handlePrint} disabled={isGenerating}>
           <FileText className="w-4 h-4 mr-2" />
-          พิมพ์เอกสาร
+          {isGenerating ? "กำลังสร้างเอกสาร..." : "พิมพ์เอกสาร"}
         </Button>
       </div>
 

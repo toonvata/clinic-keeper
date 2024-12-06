@@ -7,7 +7,7 @@ const corsHeaders = {
 }
 
 function convertToThaiText(number: number): string {
-  const units = ['', 'หนึ่ง', 'สอง',  'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า', 'สิบ']
+  const units = ['', 'หนึ่ง', 'สอง', 'สาม', 'สี่', 'ห้า', 'หก', 'เจ็ด', 'แปด', 'เก้า', 'สิบ']
   const positions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน', 'ล้าน']
   
   let text = ''
@@ -24,6 +24,7 @@ function convertToThaiText(number: number): string {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -35,6 +36,7 @@ serve(async (req) => {
     // Launch browser
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
+    console.log('Browser launched successfully')
 
     const amountInWords = convertToThaiText(receiptData.amount)
 
@@ -46,12 +48,8 @@ serve(async (req) => {
           <meta charset="UTF-8">
           <title>ใบเสร็จรับเงิน</title>
           <style>
-            @font-face {
-              font-family: 'Sarabun';
-              src: url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap');
-            }
             body { 
-              font-family: 'Sarabun', sans-serif;
+              font-family: sans-serif;
               padding: 40px;
               font-size: 16px;
               line-height: 1.6;
@@ -124,8 +122,12 @@ serve(async (req) => {
       </html>
     `
 
+    console.log('HTML content generated')
+
     // Set content and generate PDF
     await page.setContent(htmlContent)
+    console.log('Content set to page')
+
     const pdf = await page.pdf({ 
       format: 'A4',
       printBackground: true,
@@ -137,10 +139,16 @@ serve(async (req) => {
       }
     })
 
-    // Convert PDF to base64
-    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdf)));
+    console.log('PDF generated successfully')
 
-    // Return the PDF as base64
+    // Close browser
+    await browser.close()
+    console.log('Browser closed')
+
+    // Convert PDF to base64
+    const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdf)))
+    console.log('PDF converted to base64')
+
     return new Response(
       JSON.stringify({ pdf: base64Pdf }),
       { 
@@ -154,7 +162,13 @@ serve(async (req) => {
     console.error('Error generating receipt:', error)
     return new Response(
       JSON.stringify({ error: error.message }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json' 
+        }, 
+        status: 500 
+      }
     )
   }
 })
