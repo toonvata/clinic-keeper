@@ -44,7 +44,7 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
     },
   });
 
-  const { data: patients } = useQuery({
+  const { data: patients, isLoading } = useQuery({
     queryKey: ["patients"],
     queryFn: async () => {
       const { data, error } = await supabase.from("patients").select("*");
@@ -70,8 +70,8 @@ const MedicalCertificate = ({ selectedPatient: initialPatient }: MedicalCertific
 
   const selectedDoctorData = doctors?.find(d => d.id.toString() === selectedDoctor);
 
-  if (!patients) {
-    return <div>Loading...</div>;
+  if (isLoading || !patients) {
+    return <div>กำลังโหลดข้อมูล...</div>;
   }
 
   return (
