@@ -9,7 +9,6 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -25,48 +24,65 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Set font
+    // Set Thai font
     doc.setFont('helvetica');
     
+    // Add clinic logo if available
+    // const logoWidth = 50;
+    // const logoHeight = 20;
+    // doc.addImage(logoBase64, 'PNG', (doc.internal.pageSize.width - logoWidth) / 2, 20, logoWidth, logoHeight);
+
     // Header
     doc.setFontSize(20);
-    doc.text('ใบเสร็จรับเงิน', 105, 20, { align: 'center' });
-    doc.setFontSize(16);
-    doc.text('Receipt', 105, 30, { align: 'center' });
+    doc.text('ใบเสร็จรับเงิน / Receipt', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', 105, 40, { align: 'center' });
-    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', 105, 45, { align: 'center' });
-    doc.text('โทร. 0909149946', 105, 50, { align: 'center' });
+    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 45, { align: 'center' });
+    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
 
     // Receipt details
-    doc.text(`เลขที่: ${receiptData.receiptNumber}`, 170, 60, { align: 'right' });
-    doc.text(`วันที่: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, 20, 70);
-    doc.text(`ได้รับเงินจาก: ${receiptData.patientName}`, 20, 80);
+    const margin = 20;
+    doc.text(`เลขที่ / No: ${receiptData.receiptNumber}`, doc.internal.pageSize.width - margin - 50, 70);
+    doc.text(`วันที่ / Date: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, margin, 70);
+    doc.text(`ได้รับเงินจาก / Received from: ${receiptData.patientName}`, margin, 80);
 
     // Table header
-    doc.line(20, 90, 190, 90);
-    doc.text('รายการ', 20, 95);
-    doc.text('จำนวนเงิน', 170, 95, { align: 'right' });
-    doc.line(20, 100, 190, 100);
+    const startY = 90;
+    doc.line(margin, startY, doc.internal.pageSize.width - margin, startY);
+    doc.text('รายการ / Description', margin, startY + 7);
+    doc.text('จำนวนเงิน / Amount', doc.internal.pageSize.width - margin - 40, startY + 7);
+    doc.line(margin, startY + 10, doc.internal.pageSize.width - margin, startY + 10);
 
     // Table content
-    let yPos = 110;
-    receiptData.items.forEach((item) => {
+    let currentY = startY + 20;
+    receiptData.items.forEach((item: any) => {
       if (item.amount > 0) {
-        doc.text(item.description, 20, yPos);
-        doc.text(`${item.amount.toLocaleString('th-TH')} บาท`, 170, yPos, { align: 'right' });
-        yPos += 10;
+        doc.text(item.description, margin, currentY);
+        doc.text(`${item.amount.toLocaleString('th-TH')} บาท`, doc.internal.pageSize.width - margin - 40, currentY, { align: 'right' });
+        currentY += 10;
       }
     });
 
     // Total
-    doc.rect(20, yPos, 170, 20);
-    doc.text(`จำนวนเงินรวมทั้งสิ้น: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท`, 105, yPos + 10, { align: 'center' });
+    const totalBoxY = currentY + 10;
+    doc.rect(margin, totalBoxY, doc.internal.pageSize.width - (2 * margin), 20);
+    doc.text(
+      `จำนวนเงินรวมทั้งสิ้น / Total Amount: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท`, 
+      doc.internal.pageSize.width / 2, 
+      totalBoxY + 13, 
+      { align: 'center' }
+    );
 
-    // Signature
-    doc.text('ผู้รับเงิน ............................................', 170, yPos + 50, { align: 'right' });
-    doc.text(`วันที่ ${format(new Date(), 'd MMMM yyyy', { locale: th })}`, 170, yPos + 60, { align: 'right' });
+    // Signature section
+    const signatureY = totalBoxY + 50;
+    doc.text('ผู้รับเงิน / Received by ............................................', doc.internal.pageSize.width - margin - 70, signatureY);
+    doc.text(
+      `วันที่ / Date ${format(new Date(), 'd MMMM yyyy', { locale: th })}`,
+      doc.internal.pageSize.width - margin - 70,
+      signatureY + 10
+    );
 
     // Convert PDF to base64
     const pdfOutput = doc.output('arraybuffer');
