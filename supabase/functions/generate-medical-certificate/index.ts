@@ -24,68 +24,70 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Use default font since we can't reliably load Thai fonts in Edge Function
+    // Set font to default since we can't use Thai font in Edge Function
     doc.setFont('helvetica');
     
     // Header
     doc.setFontSize(20);
-    doc.text('Medical Certificate', doc.internal.pageSize.width / 2, 30, { align: 'center' });
+    doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     doc.setFontSize(16);
-    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.text('Medical Certificate', doc.internal.pageSize.width / 2, 40, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.text('162 Suansomdet Road, Na Mueang, Mueang, Chachoengsao', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('Tel. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
+    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 55, { align: 'center' });
+    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 60, { align: 'center' });
+    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 65, { align: 'center' });
 
     // Certificate details
     const margin = 25;
     let currentY = 80;
 
     // Certificate number
-    doc.text(`Certificate No: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
+    doc.text(`เลขที่: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
     
     currentY += 15;
-    doc.text(`Doctor: ${certificateData.doctorName}`, margin, currentY);
+    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ได้ทำการตรวจร่างกาย`, margin, currentY);
     
     currentY += 10;
-    doc.text(`Patient: ${certificateData.patientName}`, margin, currentY);
+    doc.text(`นาย/นาง/นางสาว ${certificateData.patientName}`, margin, currentY);
     
     currentY += 10;
-    doc.text(`Visit Date: ${format(new Date(certificateData.visitDate), 'dd/MM/yyyy')}`, margin, currentY);
+    doc.text(`เมื่อวันที่ ${format(new Date(certificateData.visitDate), 'd MMMM yyyy', { locale: th })}`, margin, currentY);
 
     if (certificateData.diagnosis) {
       currentY += 10;
-      doc.text(`Diagnosis: ${certificateData.diagnosis}`, margin, currentY);
+      doc.text(`ผลการตรวจ/วินิจฉัยโรค: ${certificateData.diagnosis}`, margin, currentY);
     }
 
     if (certificateData.startDate && certificateData.endDate) {
       currentY += 10;
-      doc.text(`Rest Period: ${format(new Date(certificateData.startDate), 'dd/MM/yyyy')}`, margin, currentY);
+      doc.text(`ให้หยุดพักตั้งแต่วันที่ ${format(new Date(certificateData.startDate), 'd MMMM yyyy', { locale: th })}`, margin, currentY);
       
       currentY += 10;
-      doc.text(`To: ${format(new Date(certificateData.endDate), 'dd/MM/yyyy')}`, margin, currentY);
+      doc.text(`ถึงวันที่ ${format(new Date(certificateData.endDate), 'd MMMM yyyy', { locale: th })}`, margin, currentY);
       
       if (certificateData.restDays) {
         currentY += 10;
-        doc.text(`Total: ${certificateData.restDays} days`, margin, currentY);
+        doc.text(`รวมเป็นเวลา ${certificateData.restDays} วัน`, margin, currentY);
       }
     }
 
     currentY += 10;
-    doc.text(`Issue Date: ${format(new Date(), 'dd/MM/yyyy')}`, margin, currentY);
+    doc.text(`ออกให้ ณ วันที่ ${format(new Date(), 'd MMMM yyyy', { locale: th })}`, margin, currentY);
 
     // Signature section
     currentY += 30;
-    doc.text('Signature: ............................................', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('ลงชื่อ ............................................', doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
     doc.text(`(${certificateData.doctorName})`, doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
-    doc.text('Medical Doctor', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('แพทย์ผู้ตรวจ', doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
-    doc.text('Medical License No. XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ว.XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
 
     // Convert PDF to base64
     const pdfOutput = doc.output('arraybuffer');
