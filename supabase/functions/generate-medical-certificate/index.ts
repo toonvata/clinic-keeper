@@ -3,9 +3,6 @@ import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
 import { format } from "https://esm.sh/date-fns@2.30.0"
 import { th } from "https://esm.sh/date-fns@2.30.0/locale"
 
-// Import Thai font
-import { Sarabun } from 'https://esm.sh/@temporary/sarabun@1.0.0'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -27,10 +24,8 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Add Thai font
-    doc.addFileToVFS('Sarabun-Regular.ttf', Sarabun);
-    doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
-    doc.setFont('Sarabun');
+    // Set font to default since we can't use Thai font in Edge Function
+    doc.setFont('helvetica');
     
     // Header
     doc.setFontSize(20);
@@ -97,7 +92,7 @@ serve(async (req) => {
     // Convert PDF to base64
     const pdfOutput = doc.output('arraybuffer');
     const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfOutput)));
-    console.log('PDF generated successfully with Thai font support');
+    console.log('PDF generated successfully');
 
     return new Response(
       JSON.stringify({ pdf: base64Pdf }),
