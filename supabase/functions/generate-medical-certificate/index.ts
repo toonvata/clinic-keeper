@@ -3,6 +3,9 @@ import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
 import { format } from "https://esm.sh/date-fns@2.30.0"
 import { th } from "https://esm.sh/date-fns@2.30.0/locale"
 
+// Import Thai font
+import { Sarabun } from 'https://esm.sh/@temporary/sarabun@1.0.0'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -24,8 +27,10 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Set Thai font
-    doc.setFont('helvetica');
+    // Add Thai font
+    doc.addFileToVFS('Sarabun-Regular.ttf', Sarabun);
+    doc.addFont('Sarabun-Regular.ttf', 'Sarabun', 'normal');
+    doc.setFont('Sarabun');
     
     // Header
     doc.setFontSize(20);
@@ -44,7 +49,7 @@ serve(async (req) => {
     let currentY = 80;
 
     // Certificate number
-    doc.text(`เลขที่ / No: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
+    doc.text(`เลขที่: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
     
     currentY += 15;
     doc.text(`ข้าพเจ้า ${certificateData.doctorName} ได้ทำการตรวจร่างกาย`, margin, currentY);
@@ -92,7 +97,7 @@ serve(async (req) => {
     // Convert PDF to base64
     const pdfOutput = doc.output('arraybuffer');
     const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfOutput)));
-    console.log('PDF generated successfully');
+    console.log('PDF generated successfully with Thai font support');
 
     return new Response(
       JSON.stringify({ pdf: base64Pdf }),
