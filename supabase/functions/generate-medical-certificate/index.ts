@@ -8,6 +8,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Base64 encoded THSarabunNew font
+const THSarabunNew = "AAEAAAATAQAABAAwRFNJR..." // Note: This is just the start of the base64 string, you need the full font file
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -24,8 +27,10 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Set font to default since we can't use Thai font in Edge Function
-    doc.setFont('helvetica');
+    // Add Thai font
+    doc.addFileToVFS('THSarabunNew.ttf', THSarabunNew);
+    doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal');
+    doc.setFont('THSarabunNew');
     
     // Header
     doc.setFontSize(20);
@@ -35,7 +40,6 @@ serve(async (req) => {
     
     doc.setFontSize(12);
     doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 55, { align: 'center' });
     doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 60, { align: 'center' });
     doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 65, { align: 'center' });
 
