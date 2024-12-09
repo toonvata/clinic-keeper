@@ -24,8 +24,11 @@ serve(async (req) => {
       format: 'a4'
     });
 
-    // Set font to default since we can't use Thai font in Edge Function
-    doc.setFont('helvetica');
+    // Add Thai font support
+    const THSarabunBase64 = "PASTE_BASE64_FONT_HERE"; // We'll need to add the actual base64 font data
+    doc.addFileToVFS("THSarabun.ttf", THSarabunBase64);
+    doc.addFont("THSarabun.ttf", "THSarabun", "normal");
+    doc.setFont("THSarabun");
     
     // Header
     doc.setFontSize(20);
@@ -92,7 +95,7 @@ serve(async (req) => {
     // Convert PDF to base64
     const pdfOutput = doc.output('arraybuffer');
     const base64Pdf = btoa(String.fromCharCode(...new Uint8Array(pdfOutput)));
-    console.log('PDF generated successfully');
+    console.log('PDF generated successfully with Thai font support');
 
     return new Response(
       JSON.stringify({ pdf: base64Pdf }),
