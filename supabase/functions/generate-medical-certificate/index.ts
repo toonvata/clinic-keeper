@@ -33,6 +33,8 @@ serve(async (req) => {
     doc.addFont('Sarabun-normal.ttf', 'Sarabun', 'normal');
     doc.setFont('Sarabun');
 
+    console.log('Added Thai font');
+
     // Set font size for header
     doc.setFontSize(16);
     
