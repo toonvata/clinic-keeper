@@ -15,7 +15,7 @@ import {
 import { Treatment } from "@/types";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas } from "fabric";
+import { Canvas as FabricCanvas, Image } from "fabric";
 
 interface TreatmentHistoryDialogProps {
   isOpen: boolean;
@@ -83,21 +83,17 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
       backgroundColor: "#ffffff",
     });
 
-    // Set background image using the new Fabric.js v6 API
-    canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
-    const img = new Image();
-    img.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
-    img.onload = () => {
-      canvas.backgroundImage = img;
-      canvas.backgroundImage.scaleX = 150 / img.width;
-      canvas.backgroundImage.scaleY = 150 / img.height;
-      canvas.renderAll();
+    // Load background image
+    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", (img) => {
+      img.scaleX = 150 / (img.width ?? 1);
+      img.scaleY = 150 / (img.height ?? 1);
+      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
 
       // Load saved drawing data
       canvas.loadFromJSON(data, () => {
         canvas.renderAll();
       });
-    };
+    });
 
     return () => {
       canvas.dispose();
