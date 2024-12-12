@@ -2,6 +2,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ImageUpload } from "./ImageUpload";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TreatmentFormProps {
   formData: any;
@@ -60,10 +61,30 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
       </div>
 
       {formData.id && (
-        <ImageUpload
-          treatmentId={formData.id}
-          onImageUploaded={handleImageUploaded}
-        />
+        <>
+          <ImageUpload
+            treatmentId={formData.id}
+            onImageUploaded={handleImageUploaded}
+          />
+          {formData.treatmentImages && formData.treatmentImages.length > 0 && (
+            <div className="mt-4">
+              <Label>รูปภาพที่อัพโหลด</Label>
+              <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {formData.treatmentImages.map((imageUrl: string, index: number) => (
+                    <div key={index} className="relative aspect-square">
+                      <img
+                        src={imageUrl}
+                        alt={`Treatment image ${index + 1}`}
+                        className="rounded-lg object-cover w-full h-full"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+        </>
       )}
 
       <div className="space-y-4">
