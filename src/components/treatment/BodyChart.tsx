@@ -24,12 +24,16 @@ const BodyChart = ({ initialData, onChange }: BodyChartProps) => {
     });
 
     // Load background image
-    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", function(img) {
-      if (img.width && img.height) {
-        img.scaleX = 150 / img.width;
-        img.scaleY = 150 / img.height;
-        fabricCanvas.backgroundImage = img;
-        fabricCanvas.renderAll();
+    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", {
+      crossOrigin: 'anonymous',
+      signal: undefined,
+      onload: (img) => {
+        if (img.width && img.height) {
+          img.scaleX = 150 / img.width;
+          img.scaleY = 150 / img.height;
+          fabricCanvas.backgroundImage = img;
+          fabricCanvas.renderAll();
+        }
       }
     });
 
