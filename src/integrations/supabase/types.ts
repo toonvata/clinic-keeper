@@ -188,7 +188,6 @@ export type Database = {
       treatments: {
         Row: {
           blood_pressure: string | null
-          body_chart: string | null
           created_at: string
           diagnosis: string
           doctor_id: number | null
@@ -205,7 +204,6 @@ export type Database = {
         }
         Insert: {
           blood_pressure?: string | null
-          body_chart?: string | null
           created_at?: string
           diagnosis: string
           doctor_id?: number | null
@@ -222,7 +220,6 @@ export type Database = {
         }
         Update: {
           blood_pressure?: string | null
-          body_chart?: string | null
           created_at?: string
           diagnosis?: string
           doctor_id?: number | null

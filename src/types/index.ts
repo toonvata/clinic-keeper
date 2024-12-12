@@ -32,5 +32,4 @@ export interface Treatment {
   medications: string;
   nextAppointment?: Date;
   doctorId?: number;
-  bodyChart?: string;
 }

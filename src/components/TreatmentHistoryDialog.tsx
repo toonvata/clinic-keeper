@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/table";
 import { Treatment } from "@/types";
 import { format } from "date-fns";
-import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas } from "fabric";
 
 interface TreatmentHistoryDialogProps {
   isOpen: boolean;
@@ -42,7 +40,6 @@ const TreatmentHistoryDialog = ({
               <TableHead>วันที่</TableHead>
               <TableHead>อาการ</TableHead>
               <TableHead>การวินิจฉัย</TableHead>
-              <TableHead>Body Chart</TableHead>
               <TableHead>การรักษา</TableHead>
               <TableHead>ยาที่ได้รับ</TableHead>
             </TableRow>
@@ -55,11 +52,6 @@ const TreatmentHistoryDialog = ({
                 </TableCell>
                 <TableCell>{treatment.symptoms}</TableCell>
                 <TableCell>{treatment.diagnosis}</TableCell>
-                <TableCell>
-                  {treatment.bodyChart && (
-                    <BodyChartDisplay data={treatment.bodyChart} />
-                  )}
-                </TableCell>
                 <TableCell>{treatment.treatment}</TableCell>
                 <TableCell>{treatment.medications}</TableCell>
               </TableRow>
@@ -68,54 +60,6 @@ const TreatmentHistoryDialog = ({
         </Table>
       </DialogContent>
     </Dialog>
-  );
-};
-
-const BodyChartDisplay = ({ data }: { data: string }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const canvas = new FabricCanvas(canvasRef.current, {
-      width: 150,
-      height: 150,
-      backgroundColor: "#ffffff",
-    });
-
-    // Load background image and drawing data
-    const loadCanvas = async () => {
-      try {
-        const img = await new Promise((resolve, reject) => {
-          const image = new Image();
-          image.crossOrigin = 'anonymous';
-          image.onload = () => resolve(image);
-          image.onerror = reject;
-          image.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
-        });
-
-        canvas.backgroundImage = img as any;
-        canvas.requestRenderAll();
-
-        canvas.loadFromJSON(data, () => {
-          canvas.renderAll();
-        });
-      } catch (error) {
-        console.error('Error loading body chart:', error);
-      }
-    };
-
-    loadCanvas();
-
-    return () => {
-      canvas.dispose();
-    };
-  }, [data]);
-
-  return (
-    <div className="border rounded-lg overflow-hidden">
-      <canvas ref={canvasRef} />
-    </div>
   );
 };
 
