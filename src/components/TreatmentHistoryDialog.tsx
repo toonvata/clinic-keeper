@@ -84,15 +84,18 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
     });
 
     // Load background image
-    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", (img) => {
-      img.scaleX = 150 / (img.width ?? 1);
-      img.scaleY = 150 / (img.height ?? 1);
-      canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-
-      // Load saved drawing data
-      canvas.loadFromJSON(data, () => {
+    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", function(img) {
+      if (img.width && img.height) {
+        img.scaleX = 150 / img.width;
+        img.scaleY = 150 / img.height;
+        canvas.backgroundImage = img;
         canvas.renderAll();
-      });
+
+        // Load saved drawing data
+        canvas.loadFromJSON(data, () => {
+          canvas.renderAll();
+        });
+      }
     });
 
     return () => {
