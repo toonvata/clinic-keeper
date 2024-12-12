@@ -84,23 +84,23 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
     });
 
     // Load background image
-    Image.fromURL("https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It", {
-      crossOrigin: 'anonymous',
-      signal: undefined,
-      onLoad: (img) => {
-        if (img.width && img.height) {
-          img.scaleX = 150 / img.width;
-          img.scaleY = 150 / img.height;
-          canvas.backgroundImage = img;
-          canvas.renderAll();
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
+    img.onload = function() {
+      const fabricImage = img as any;
+      if (fabricImage.width && fabricImage.height) {
+        fabricImage.scaleX = 150 / fabricImage.width;
+        fabricImage.scaleY = 150 / fabricImage.height;
+        canvas.backgroundImage = fabricImage;
+        canvas.renderAll();
 
-          // Load saved drawing data
-          canvas.loadFromJSON(data, () => {
-            canvas.renderAll();
-          });
-        }
+        // Load saved drawing data
+        canvas.loadFromJSON(data, () => {
+          canvas.renderAll();
+        });
       }
-    });
+    };
 
     return () => {
       canvas.dispose();
