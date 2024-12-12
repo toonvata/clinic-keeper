@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Path } from "fabric";
+import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Eraser, Pencil } from "lucide-react";
 
@@ -23,14 +23,15 @@ const BodyChart = ({ initialData, onChange }: BodyChartProps) => {
       isDrawingMode: true,
     });
 
-    // Set background image
+    // Set background image using the new Fabric.js v6 API
+    fabricCanvas.setBackgroundColor("#ffffff", fabricCanvas.renderAll.bind(fabricCanvas));
     const img = new Image();
     img.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
     img.onload = () => {
-      fabricCanvas.setBackgroundImage(img.src, fabricCanvas.renderAll.bind(fabricCanvas), {
-        scaleX: 150 / img.width,
-        scaleY: 150 / img.height,
-      });
+      fabricCanvas.backgroundImage = img;
+      fabricCanvas.backgroundImage.scaleX = 150 / img.width;
+      fabricCanvas.backgroundImage.scaleY = 150 / img.height;
+      fabricCanvas.renderAll();
     };
 
     if (initialData) {

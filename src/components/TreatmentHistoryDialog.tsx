@@ -83,14 +83,15 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
       backgroundColor: "#ffffff",
     });
 
-    // Set background image
+    // Set background image using the new Fabric.js v6 API
+    canvas.setBackgroundColor("#ffffff", canvas.renderAll.bind(canvas));
     const img = new Image();
     img.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
     img.onload = () => {
-      canvas.setBackgroundImage(img.src, canvas.renderAll.bind(canvas), {
-        scaleX: 150 / img.width,
-        scaleY: 150 / img.height,
-      });
+      canvas.backgroundImage = img;
+      canvas.backgroundImage.scaleX = 150 / img.width;
+      canvas.backgroundImage.scaleY = 150 / img.height;
+      canvas.renderAll();
 
       // Load saved drawing data
       canvas.loadFromJSON(data, () => {
