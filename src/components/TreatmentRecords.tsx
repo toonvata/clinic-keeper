@@ -39,6 +39,7 @@ const TreatmentRecords = ({
     diagnosis: "",
     treatment: "",
     medications: "",
+    bodyChart: "",
   });
 
   useEffect(() => {
@@ -83,7 +84,8 @@ const TreatmentRecords = ({
           diagnosis: formData.diagnosis,
           treatment: formData.treatment,
           medications: formData.medications,
-          doctor_id: selectedDoctorId
+          doctor_id: selectedDoctorId,
+          body_chart: formData.bodyChart
         })
         .select()
         .single();
@@ -104,7 +106,8 @@ const TreatmentRecords = ({
         diagnosis: data.diagnosis,
         treatment: data.treatment,
         medications: data.medications,
-        doctorId: data.doctor_id
+        doctorId: data.doctor_id,
+        bodyChart: data.body_chart
       };
 
       // Reset form
@@ -121,6 +124,7 @@ const TreatmentRecords = ({
         diagnosis: "",
         treatment: "",
         medications: "",
+        bodyChart: "",
       });
 
       // Call onAddTreatment to update the parent component's state
