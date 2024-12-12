@@ -15,7 +15,7 @@ import {
 import { Treatment } from "@/types";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Image } from "fabric";
+import { Canvas as FabricCanvas, Image as FabricImage } from "fabric";
 
 interface TreatmentHistoryDialogProps {
   isOpen: boolean;
@@ -84,23 +84,24 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
     });
 
     // Load background image
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
-    img.onload = function() {
-      const fabricImage = img as any;
-      if (fabricImage.width && fabricImage.height) {
-        fabricImage.scaleX = 150 / fabricImage.width;
-        fabricImage.scaleY = 150 / fabricImage.height;
-        canvas.backgroundImage = fabricImage;
-        canvas.renderAll();
+    FabricImage.fromURL(
+      "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
+      (img) => {
+        if (img.width && img.height) {
+          img.scaleToWidth(150);
+          img.scaleToHeight(150);
+          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
 
-        // Load saved drawing data
-        canvas.loadFromJSON(data, () => {
-          canvas.renderAll();
-        });
+          // Load saved drawing data
+          canvas.loadFromJSON(data, () => {
+            canvas.renderAll();
+          });
+        }
+      },
+      {
+        crossOrigin: 'anonymous'
       }
-    };
+    );
 
     return () => {
       canvas.dispose();
