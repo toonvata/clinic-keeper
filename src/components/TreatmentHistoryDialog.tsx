@@ -86,11 +86,12 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
     // Load background image
     FabricImage.fromURL(
       "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
-      (img) => {
+      function(img) {
         if (img.width && img.height) {
           img.scaleToWidth(150);
           img.scaleToHeight(150);
-          canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
+          canvas.backgroundImage = img;
+          canvas.renderAll();
 
           // Load saved drawing data
           canvas.loadFromJSON(data, () => {
@@ -98,9 +99,7 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
           });
         }
       },
-      {
-        crossOrigin: 'anonymous'
-      }
+      { crossOrigin: 'anonymous' }
     );
 
     return () => {
