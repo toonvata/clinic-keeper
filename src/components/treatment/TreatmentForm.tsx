@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import BodyChart from "./BodyChart";
 
 interface TreatmentFormProps {
   formData: any;
@@ -34,6 +35,7 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
           id="symptoms"
           required
           onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
+          value={formData.symptoms || ''}
         />
       </div>
 
@@ -45,6 +47,15 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
           onChange={(e) =>
             setFormData({ ...formData, diagnosis: e.target.value })
           }
+          value={formData.diagnosis || ''}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label>Body Chart</Label>
+        <BodyChart
+          initialData={formData.bodyChart}
+          onChange={(data) => setFormData({ ...formData, bodyChart: data })}
         />
       </div>
 
@@ -136,6 +147,7 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
           onChange={(e) =>
             setFormData({ ...formData, medications: e.target.value })
           }
+          value={formData.medications || ''}
         />
       </div>
     </>
