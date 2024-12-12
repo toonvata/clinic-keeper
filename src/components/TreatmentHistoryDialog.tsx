@@ -86,7 +86,7 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
     // Load background image
     FabricImage.fromURL(
       "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
-      function(img) {
+      (img: FabricImage) => {
         if (img.width && img.height) {
           img.scaleToWidth(150);
           img.scaleToHeight(150);
