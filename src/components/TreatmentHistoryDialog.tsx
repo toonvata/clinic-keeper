@@ -94,13 +94,11 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
           image.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
         });
 
-        canvas.setBackgroundImage(img as HTMLImageElement, () => {
-          canvas.loadFromJSON(data, () => {
-            canvas.renderAll();
-          });
-        }, {
-          scaleX: 150 / (img as HTMLImageElement).width,
-          scaleY: 150 / (img as HTMLImageElement).height,
+        canvas.backgroundImage = img as any;
+        canvas.requestRenderAll();
+
+        canvas.loadFromJSON(data, () => {
+          canvas.renderAll();
         });
       } catch (error) {
         console.error('Error loading body chart:', error);

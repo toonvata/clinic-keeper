@@ -34,17 +34,14 @@ const BodyChart = ({ initialData, onChange }: BodyChartProps) => {
           image.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
         });
 
-        fabricCanvas.setBackgroundImage(img as HTMLImageElement, () => {
-          if (initialData) {
-            fabricCanvas.loadFromJSON(initialData, () => {
-              fabricCanvas.renderAll();
-            });
-          }
-          fabricCanvas.renderAll();
-        }, {
-          scaleX: 150 / (img as HTMLImageElement).width,
-          scaleY: 150 / (img as HTMLImageElement).height,
-        });
+        fabricCanvas.backgroundImage = img as any;
+        fabricCanvas.requestRenderAll();
+
+        if (initialData) {
+          fabricCanvas.loadFromJSON(initialData, () => {
+            fabricCanvas.renderAll();
+          });
+        }
       } catch (error) {
         console.error('Error loading background image:', error);
       }
