@@ -26,15 +26,15 @@ const BodyChart = ({ initialData, onChange }: BodyChartProps) => {
     // Load background image
     FabricImage.fromURL(
       "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
-      (img: FabricImage) => {
+      { crossOrigin: 'anonymous' },
+      (img) => {
         if (img.width && img.height) {
           img.scaleToWidth(150);
           img.scaleToHeight(150);
           fabricCanvas.backgroundImage = img;
           fabricCanvas.renderAll();
         }
-      },
-      { crossOrigin: 'anonymous' }
+      }
     );
 
     if (initialData) {
