@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Image as FabricImage } from "fabric";
+import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Eraser, Pencil } from "lucide-react";
 
@@ -24,24 +24,33 @@ const BodyChart = ({ initialData, onChange }: BodyChartProps) => {
     });
 
     // Load background image
-    FabricImage.fromURL(
-      "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
-      { crossOrigin: 'anonymous' },
-      (img) => {
-        if (img.width && img.height) {
-          img.scaleToWidth(150);
-          img.scaleToHeight(150);
-          fabricCanvas.backgroundImage = img;
-          fabricCanvas.renderAll();
-        }
-      }
-    );
+    const loadBackgroundImage = async () => {
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.crossOrigin = 'anonymous';
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
+        });
 
-    if (initialData) {
-      fabricCanvas.loadFromJSON(initialData, () => {
-        fabricCanvas.renderAll();
-      });
-    }
+        fabricCanvas.setBackgroundImage(img as HTMLImageElement, () => {
+          if (initialData) {
+            fabricCanvas.loadFromJSON(initialData, () => {
+              fabricCanvas.renderAll();
+            });
+          }
+          fabricCanvas.renderAll();
+        }, {
+          scaleX: 150 / (img as HTMLImageElement).width,
+          scaleY: 150 / (img as HTMLImageElement).height,
+        });
+      } catch (error) {
+        console.error('Error loading background image:', error);
+      }
+    };
+
+    loadBackgroundImage();
 
     fabricCanvas.freeDrawingBrush.width = 2;
     fabricCanvas.freeDrawingBrush.color = "#ff0000";

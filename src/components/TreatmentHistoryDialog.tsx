@@ -15,7 +15,7 @@ import {
 import { Treatment } from "@/types";
 import { format } from "date-fns";
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Image as FabricImage } from "fabric";
+import { Canvas as FabricCanvas } from "fabric";
 
 interface TreatmentHistoryDialogProps {
   isOpen: boolean;
@@ -83,24 +83,31 @@ const BodyChartDisplay = ({ data }: { data: string }) => {
       backgroundColor: "#ffffff",
     });
 
-    // Load background image
-    FabricImage.fromURL(
-      "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It",
-      { crossOrigin: 'anonymous' },
-      (img) => {
-        if (img.width && img.height) {
-          img.scaleToWidth(150);
-          img.scaleToHeight(150);
-          canvas.backgroundImage = img;
-          canvas.renderAll();
+    // Load background image and drawing data
+    const loadCanvas = async () => {
+      try {
+        const img = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.crossOrigin = 'anonymous';
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = "https://pic.in.th/image/hbAE5cmOf1iUg4DqoSCjaQ-b.m088It";
+        });
 
-          // Load saved drawing data
+        canvas.setBackgroundImage(img as HTMLImageElement, () => {
           canvas.loadFromJSON(data, () => {
             canvas.renderAll();
           });
-        }
+        }, {
+          scaleX: 150 / (img as HTMLImageElement).width,
+          scaleY: 150 / (img as HTMLImageElement).height,
+        });
+      } catch (error) {
+        console.error('Error loading body chart:', error);
       }
-    );
+    };
+
+    loadCanvas();
 
     return () => {
       canvas.dispose();
