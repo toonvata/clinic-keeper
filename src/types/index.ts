@@ -32,4 +32,5 @@ export interface Treatment {
   medications: string;
   nextAppointment?: Date;
   doctorId?: number;
+  treatmentImages?: string[];
 }

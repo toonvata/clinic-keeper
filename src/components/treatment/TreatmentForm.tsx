@@ -1,6 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUpload } from "./ImageUpload";
 
 interface TreatmentFormProps {
   formData: any;
@@ -26,6 +27,14 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
     });
   };
 
+  const handleImageUploaded = (imageUrl: string) => {
+    const currentImages = formData.treatmentImages || [];
+    setFormData({
+      ...formData,
+      treatmentImages: [...currentImages, imageUrl]
+    });
+  };
+
   return (
     <>
       <div className="space-y-2">
@@ -33,6 +42,7 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
         <Textarea
           id="symptoms"
           required
+          value={formData.symptoms || ''}
           onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
         />
       </div>
@@ -42,11 +52,19 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
         <Textarea
           id="diagnosis"
           required
+          value={formData.diagnosis || ''}
           onChange={(e) =>
             setFormData({ ...formData, diagnosis: e.target.value })
           }
         />
       </div>
+
+      {formData.id && (
+        <ImageUpload
+          treatmentId={formData.id}
+          onImageUploaded={handleImageUploaded}
+        />
+      )}
 
       <div className="space-y-4">
         <Label>การรักษา</Label>
@@ -133,6 +151,7 @@ export const TreatmentForm = ({ formData, setFormData }: TreatmentFormProps) => 
         <Textarea
           id="medications"
           required
+          value={formData.medications || ''}
           onChange={(e) =>
             setFormData({ ...formData, medications: e.target.value })
           }
