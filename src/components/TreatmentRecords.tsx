@@ -39,6 +39,7 @@ const TreatmentRecords = ({
     diagnosis: "",
     treatment: "",
     medications: "",
+    treatmentImages: [] as string[]
   });
 
   useEffect(() => {
@@ -104,7 +105,8 @@ const TreatmentRecords = ({
         diagnosis: data.diagnosis,
         treatment: data.treatment,
         medications: data.medications,
-        doctorId: data.doctor_id
+        doctorId: data.doctor_id,
+        treatmentImages: []
       };
 
       // Reset form
@@ -121,9 +123,9 @@ const TreatmentRecords = ({
         diagnosis: "",
         treatment: "",
         medications: "",
+        treatmentImages: []
       });
 
-      // Call onAddTreatment to update the parent component's state
       onAddTreatment(newTreatment);
 
       toast({
@@ -140,9 +142,51 @@ const TreatmentRecords = ({
     }
   };
 
-  const handlePatientSelect = (patient: Patient) => {
+  const handlePatientSelect = async (patient: Patient) => {
     setCurrentPatient(patient);
     setFormData((prev) => ({ ...prev, patientHN: patient.hn }));
+
+    // Fetch the latest treatment images for this patient
+    try {
+      const { data: treatmentData, error } = await supabase
+        .from('treatments')
+        .select('*')
+        .eq('patient_hn', patient.hn)
+        .order('treatment_date', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (error) {
+        console.error('Error fetching treatment:', error);
+        return;
+      }
+
+      if (treatmentData) {
+        // Get all files from the treatment-images bucket for this treatment
+        const { data: filesData } = await supabase
+          .storage
+          .from('treatment-images')
+          .list(treatmentData.id.toString());
+
+        if (filesData) {
+          const imageUrls = filesData.map(file => {
+            const { data: { publicUrl } } = supabase
+              .storage
+              .from('treatment-images')
+              .getPublicUrl(`${treatmentData.id}/${file.name}`);
+            return publicUrl;
+          });
+
+          setFormData(prev => ({
+            ...prev,
+            id: treatmentData.id,
+            treatmentImages: imageUrls
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching treatment images:', error);
+    }
   };
 
   return (
