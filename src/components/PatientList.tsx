@@ -14,6 +14,7 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { Patient, Treatment } from "@/types";
 import TreatmentHistoryDialog from "./TreatmentHistoryDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PatientListProps {
   patients: Patient[];
@@ -35,6 +36,7 @@ const PatientList = ({
     name: string;
   } | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [patientTreatments, setPatientTreatments] = useState<Treatment[]>([]);
 
   const filteredPatients = patients.filter((patient) => {
     const searchLower = searchTerm.toLowerCase();
@@ -53,16 +55,42 @@ const PatientList = ({
     });
   };
 
-  const handleShowHistory = (patient: Patient) => {
+  const handleShowHistory = async (patient: Patient) => {
     setSelectedPatient({
       hn: patient.hn,
       name: `${patient.firstName} ${patient.lastName}`,
     });
-    setShowHistory(true);
-  };
 
-  const getPatientTreatments = (hn: string) => {
-    return treatments.filter((treatment) => treatment.patientHN === hn);
+    // Fetch treatments with images
+    const patientTreatments = treatments.filter((t) => t.patientHN === patient.hn);
+    const treatmentsWithImages = await Promise.all(
+      patientTreatments.map(async (treatment) => {
+        try {
+          const { data: filesData } = await supabase
+            .storage
+            .from('treatment-images')
+            .list(treatment.id.toString());
+
+          if (filesData && filesData.length > 0) {
+            const imageUrls = filesData.map(file => {
+              const { data: { publicUrl } } = supabase
+                .storage
+                .from('treatment-images')
+                .getPublicUrl(`${treatment.id}/${file.name}`);
+              return publicUrl;
+            });
+            return { ...treatment, treatmentImages: imageUrls };
+          }
+          return treatment;
+        } catch (error) {
+          console.error('Error fetching treatment images:', error);
+          return treatment;
+        }
+      })
+    );
+
+    setPatientTreatments(treatmentsWithImages);
+    setShowHistory(true);
   };
 
   return (
@@ -128,7 +156,7 @@ const PatientList = ({
           <TreatmentHistoryDialog
             isOpen={showHistory}
             onClose={() => setShowHistory(false)}
-            treatments={getPatientTreatments(selectedPatient.hn)}
+            treatments={patientTreatments}
             patientName={selectedPatient.name}
           />
         )}
