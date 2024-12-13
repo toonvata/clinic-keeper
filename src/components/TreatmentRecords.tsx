@@ -17,6 +17,40 @@ interface TreatmentRecordsProps {
   selectedPatient?: Patient | null;
 }
 
+interface TreatmentFormData {
+  id: string;
+  patientHN: string;
+  treatmentDate: Date;
+  vitalSigns: {
+    bloodPressure: string;
+    heartRate: number;
+    temperature: number;
+    respiratoryRate: number;
+  };
+  symptoms: string;
+  diagnosis: string;
+  treatment: string;
+  medications: string;
+  treatmentImages: string[];
+}
+
+const initialFormData: TreatmentFormData = {
+  id: "",
+  patientHN: "",
+  treatmentDate: new Date(),
+  vitalSigns: {
+    bloodPressure: "",
+    heartRate: 0,
+    temperature: 0,
+    respiratoryRate: 0,
+  },
+  symptoms: "",
+  diagnosis: "",
+  treatment: "",
+  medications: "",
+  treatmentImages: []
+};
+
 const TreatmentRecords = ({
   treatments,
   onAddTreatment,
@@ -27,22 +61,7 @@ const TreatmentRecords = ({
   const [showSearch, setShowSearch] = useState(false);
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({
-    id: "",
-    patientHN: "",
-    treatmentDate: new Date(),
-    vitalSigns: {
-      bloodPressure: "",
-      heartRate: 0,
-      temperature: 0,
-      respiratoryRate: 0,
-    },
-    symptoms: "",
-    diagnosis: "",
-    treatment: "",
-    medications: "",
-    treatmentImages: [] as string[]
-  });
+  const [formData, setFormData] = useState<TreatmentFormData>(initialFormData);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -111,21 +130,10 @@ const TreatmentRecords = ({
         treatmentImages: []
       };
 
-      // Reset form
+      // Reset form using initialFormData
       setFormData({
+        ...initialFormData,
         patientHN: currentPatient.hn,
-        treatmentDate: new Date(),
-        vitalSigns: {
-          bloodPressure: "",
-          heartRate: 0,
-          temperature: 0,
-          respiratoryRate: 0,
-        },
-        symptoms: "",
-        diagnosis: "",
-        treatment: "",
-        medications: "",
-        treatmentImages: []
       });
 
       onAddTreatment(newTreatment);
@@ -148,7 +156,6 @@ const TreatmentRecords = ({
     setCurrentPatient(patient);
     setFormData((prev) => ({ ...prev, patientHN: patient.hn }));
 
-    // Fetch the latest treatment images for this patient
     try {
       const { data: treatmentData, error } = await supabase
         .from('treatments')
@@ -164,7 +171,6 @@ const TreatmentRecords = ({
       }
 
       if (treatmentData) {
-        // Get all files from the treatment-images bucket for this treatment
         const { data: filesData } = await supabase
           .storage
           .from('treatment-images')
@@ -181,7 +187,7 @@ const TreatmentRecords = ({
 
           setFormData(prev => ({
             ...prev,
-            id: treatmentData.id,
+            id: treatmentData.id.toString(),
             treatmentImages: imageUrls
           }));
         }
