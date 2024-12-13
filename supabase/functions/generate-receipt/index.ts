@@ -3,9 +3,6 @@ import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
 import { format } from "https://esm.sh/date-fns@2.30.0"
 import { th } from "https://esm.sh/date-fns@2.30.0/locale"
 
-// Thai font
-import { Sarabun } from 'https://esm.sh/@thaifonts-typescript/sarabun@1.0.0'
-
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -29,10 +26,14 @@ serve(async (req) => {
       floatPrecision: 16
     });
 
-    // Add Thai font
-    doc.addFileToVFS('Sarabun-normal.ttf', Sarabun);
-    doc.addFont('Sarabun-normal.ttf', 'Sarabun', 'normal');
-    doc.setFont('Sarabun');
+    // Add Thai font support using base64 encoded font
+    const THSarabunBase64 = await fetch('https://raw.githubusercontent.com/MicroSUR/HTML_CSS/master/fonts/THSarabunNew.ttf').then(res => res.arrayBuffer()).then(buffer => {
+      return Buffer.from(buffer).toString('base64');
+    });
+    
+    doc.addFileToVFS('THSarabunNew.ttf', THSarabunBase64);
+    doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal');
+    doc.setFont('THSarabunNew');
 
     console.log('Created PDF document with Thai font support');
 
