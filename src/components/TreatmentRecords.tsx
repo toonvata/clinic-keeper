@@ -5,7 +5,8 @@ import { useToast } from "@/components/ui/use-toast";
 import { Treatment, Patient } from "@/types";
 import { PatientSearch } from "./treatment/PatientSearch";
 import { VitalSignsForm } from "./treatment/VitalSignsForm";
-import { TreatmentForm } from "./treatment/TreatmentForm";
+import { TreatmentFormFields } from "./treatment/TreatmentFormFields";
+import { TreatmentImageUpload } from "./treatment/TreatmentImageUpload";
 import { DoctorSelect } from "./treatment/DoctorSelect";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -189,6 +190,13 @@ const TreatmentRecords = ({
     }
   };
 
+  const handleImageUploaded = (imageUrl: string) => {
+    setFormData(prev => ({
+      ...prev,
+      treatmentImages: [...prev.treatmentImages, imageUrl]
+    }));
+  };
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -208,7 +216,13 @@ const TreatmentRecords = ({
 
           <VitalSignsForm formData={formData} setFormData={setFormData} />
 
-          <TreatmentForm formData={formData} setFormData={setFormData} />
+          <TreatmentFormFields formData={formData} setFormData={setFormData} />
+
+          <TreatmentImageUpload
+            treatmentId={formData.id}
+            images={formData.treatmentImages}
+            onImageUploaded={handleImageUploaded}
+          />
 
           <Button type="submit" className="w-full">
             บันทึกข้อมูล
