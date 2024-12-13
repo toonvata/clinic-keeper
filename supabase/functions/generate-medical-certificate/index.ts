@@ -3,6 +3,9 @@ import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
 import { format } from "https://esm.sh/date-fns@2.30.0"
 import { th } from "https://esm.sh/date-fns@2.30.0/locale"
 
+// Thai font
+import { Sarabun } from 'https://esm.sh/@thaifonts-typescript/sarabun@1.0.0'
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -26,13 +29,15 @@ serve(async (req) => {
       floatPrecision: 16
     });
 
-    console.log('Created PDF document');
+    // Add Thai font
+    doc.addFileToVFS('Sarabun-normal.ttf', Sarabun);
+    doc.addFont('Sarabun-normal.ttf', 'Sarabun', 'normal');
+    doc.setFont('Sarabun');
 
-    // Set default font
-    doc.setFont("helvetica");
-    doc.setFontSize(16);
-    
+    console.log('Created PDF document with Thai font support');
+
     // Header
+    doc.setFontSize(16);
     doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     doc.text('Medical Certificate', doc.internal.pageSize.width / 2, 40, { align: 'center' });
     
