@@ -1,14 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Treatment, Patient } from "@/types";
-import { PatientSearch } from "./treatment/PatientSearch";
-import { VitalSignsForm } from "./treatment/VitalSignsForm";
-import { TreatmentFormFields } from "./treatment/TreatmentFormFields";
-import { TreatmentImageUpload } from "./treatment/TreatmentImageUpload";
-import { DoctorSelect } from "./treatment/DoctorSelect";
+import { TreatmentFormData, initialFormData } from "@/types/treatment";
 import { supabase } from "@/integrations/supabase/client";
+import { TreatmentForm } from "./treatment/TreatmentForm";
 
 interface TreatmentRecordsProps {
   treatments: Treatment[];
@@ -16,40 +12,6 @@ interface TreatmentRecordsProps {
   patients: Patient[];
   selectedPatient?: Patient | null;
 }
-
-interface TreatmentFormData {
-  id: string;
-  patientHN: string;
-  treatmentDate: Date;
-  vitalSigns: {
-    bloodPressure: string;
-    heartRate: number;
-    temperature: number;
-    respiratoryRate: number;
-  };
-  symptoms: string;
-  diagnosis: string;
-  treatment: string;
-  medications: string;
-  treatmentImages: string[];
-}
-
-const initialFormData: TreatmentFormData = {
-  id: "",
-  patientHN: "",
-  treatmentDate: new Date(),
-  vitalSigns: {
-    bloodPressure: "",
-    heartRate: 0,
-    temperature: 0,
-    respiratoryRate: 0,
-  },
-  symptoms: "",
-  diagnosis: "",
-  treatment: "",
-  medications: "",
-  treatmentImages: []
-};
 
 const TreatmentRecords = ({
   treatments,
@@ -130,7 +92,6 @@ const TreatmentRecords = ({
         treatmentImages: []
       };
 
-      // Reset form using initialFormData
       setFormData({
         ...initialFormData,
         patientHN: currentPatient.hn,
@@ -207,34 +168,19 @@ const TreatmentRecords = ({
   return (
     <Card>
       <CardContent className="pt-6">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <PatientSearch
-            showSearch={showSearch}
-            setShowSearch={setShowSearch}
-            selectedPatient={currentPatient}
-            patients={patients}
-            onPatientSelect={handlePatientSelect}
-          />
-
-          <DoctorSelect
-            selectedDoctorId={selectedDoctorId}
-            onDoctorSelect={setSelectedDoctorId}
-          />
-
-          <VitalSignsForm formData={formData} setFormData={setFormData} />
-
-          <TreatmentFormFields formData={formData} setFormData={setFormData} />
-
-          <TreatmentImageUpload
-            treatmentId={formData.id}
-            images={formData.treatmentImages}
-            onImageUploaded={handleImageUploaded}
-          />
-
-          <Button type="submit" className="w-full">
-            บันทึกข้อมูล
-          </Button>
-        </form>
+        <TreatmentForm
+          formData={formData}
+          setFormData={setFormData}
+          showSearch={showSearch}
+          setShowSearch={setShowSearch}
+          currentPatient={currentPatient}
+          patients={patients}
+          selectedDoctorId={selectedDoctorId}
+          setSelectedDoctorId={setSelectedDoctorId}
+          onPatientSelect={handlePatientSelect}
+          onImageUploaded={handleImageUploaded}
+          onSubmit={handleSubmit}
+        />
       </CardContent>
     </Card>
   );
