@@ -28,6 +28,7 @@ const TreatmentRecords = ({
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
+    id: "",
     patientHN: "",
     treatmentDate: new Date(),
     vitalSigns: {
