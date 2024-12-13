@@ -26,13 +26,8 @@ serve(async (req) => {
       floatPrecision: 16
     });
 
-    // Add Thai font support using base64 encoded font
-    const THSarabunBase64 = await fetch('https://raw.githubusercontent.com/MicroSUR/HTML_CSS/master/fonts/THSarabunNew.ttf').then(res => res.arrayBuffer()).then(buffer => {
-      return Buffer.from(buffer).toString('base64');
-    });
-    
-    doc.addFileToVFS('THSarabunNew.ttf', THSarabunBase64);
-    doc.addFont('THSarabunNew.ttf', 'THSarabunNew', 'normal');
+    // Add embedded Thai font
+    doc.addFont('THSarabunNew', 'THSarabunNew', 'normal');
     doc.setFont('THSarabunNew');
 
     console.log('Created PDF document with Thai font support');
