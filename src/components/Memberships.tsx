@@ -29,6 +29,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import { MembershipDetails } from "./membership/MembershipDetails";
+import { CourseForm } from "./course/CourseForm";
 
 interface MembershipsProps {
   patients: Patient[];
@@ -179,47 +180,50 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
       <CardContent className="pt-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-lg font-semibold">
-            คอร์สของคุณ {selectedPatient.firstName} {selectedPatient.lastName}
+            คอร์สของคุณ {selectedPatient?.firstName} {selectedPatient?.lastName}
           </h3>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>ซื้อคอร์สใหม่</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px]">
-              <DialogHeader>
-                <DialogTitle>ซื้อคอร์สใหม่</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div className="space-y-2">
-                  <Select
-                    value={selectedCourseId}
-                    onValueChange={setSelectedCourseId}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="เลือกคอร์ส" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses.map((course) => (
-                        <SelectItem
-                          key={course.id}
-                          value={course.id.toString()}
-                          className="flex flex-col items-start py-2"
-                        >
-                          <div className="font-medium">{course.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {course.totalSessions} ครั้ง - {course.price.toLocaleString()} บาท
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <div className="flex gap-2">
+            <CourseForm />
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>ซื้อคอร์สใหม่</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>ซื้อคอร์สใหม่</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 pt-4">
+                  <div className="space-y-2">
+                    <Select
+                      value={selectedCourseId}
+                      onValueChange={setSelectedCourseId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="เลือกคอร์ส" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses.map((course) => (
+                          <SelectItem
+                            key={course.id}
+                            value={course.id.toString()}
+                            className="flex flex-col items-start py-2"
+                          >
+                            <div className="font-medium">{course.name}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {course.totalSessions} ครั้ง - {course.price.toLocaleString()} บาท
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button onClick={handlePurchaseCourse} className="w-full">
+                    ยืนยันการซื้อคอร์ส
+                  </Button>
                 </div>
-                <Button onClick={handlePurchaseCourse} className="w-full">
-                  ยืนยันการซื้อคอร์ส
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Table>
