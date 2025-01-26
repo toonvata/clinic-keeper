@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      courses: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: number
+          name: string
+          price: number
+          total_sessions: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name: string
+          price: number
+          total_sessions: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          name?: string
+          price?: number
+          total_sessions?: number
+        }
+        Relationships: []
+      }
       doctors: {
         Row: {
           created_at: string | null
@@ -83,6 +110,87 @@ export type Database = {
           },
           {
             foreignKeyName: "medical_certificates_patient_hn_fkey"
+            columns: ["patient_hn"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["hn"]
+          },
+        ]
+      }
+      membership_usage: {
+        Row: {
+          id: number
+          membership_id: number | null
+          treatment_id: number | null
+          used_at: string | null
+        }
+        Insert: {
+          id?: number
+          membership_id?: number | null
+          treatment_id?: number | null
+          used_at?: string | null
+        }
+        Update: {
+          id?: number
+          membership_id?: number | null
+          treatment_id?: number | null
+          used_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membership_usage_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "membership_usage_treatment_id_fkey"
+            columns: ["treatment_id"]
+            isOneToOne: false
+            referencedRelation: "treatments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      memberships: {
+        Row: {
+          course_id: number | null
+          created_at: string | null
+          expiry_date: string | null
+          id: number
+          patient_hn: string | null
+          purchase_date: string | null
+          remaining_sessions: number
+        }
+        Insert: {
+          course_id?: number | null
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          patient_hn?: string | null
+          purchase_date?: string | null
+          remaining_sessions: number
+        }
+        Update: {
+          course_id?: number | null
+          created_at?: string | null
+          expiry_date?: string | null
+          id?: number
+          patient_hn?: string | null
+          purchase_date?: string | null
+          remaining_sessions?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "memberships_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "memberships_patient_hn_fkey"
             columns: ["patient_hn"]
             isOneToOne: false
             referencedRelation: "patients"

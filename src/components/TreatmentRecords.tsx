@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
-import { Treatment, Patient } from "@/types";
+import { Treatment, Patient, Membership } from "@/types";
 import { TreatmentFormData, initialFormData } from "@/types/treatment";
 import { supabase } from "@/integrations/supabase/client";
 import { TreatmentForm } from "./treatment/TreatmentForm";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TreatmentRecordsProps {
   treatments: Treatment[];
@@ -24,13 +31,54 @@ const TreatmentRecords = ({
   const [currentPatient, setCurrentPatient] = useState<Patient | null>(null);
   const [selectedDoctorId, setSelectedDoctorId] = useState<number | null>(null);
   const [formData, setFormData] = useState<TreatmentFormData>(initialFormData);
+  const [memberships, setMemberships] = useState<Membership[]>([]);
+  const [selectedMembershipId, setSelectedMembershipId] = useState<string>("");
 
   useEffect(() => {
     if (selectedPatient) {
       setCurrentPatient(selectedPatient);
       setFormData(prev => ({ ...prev, patientHN: selectedPatient.hn }));
+      fetchMemberships(selectedPatient.hn);
     }
   }, [selectedPatient]);
+
+  const fetchMemberships = async (patientHN: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("memberships")
+        .select("*, courses(*)")
+        .eq("patient_hn", patientHN)
+        .gt("remaining_sessions", 0);
+
+      if (error) throw error;
+
+      const formattedMemberships: Membership[] = data.map((membership) => ({
+        id: membership.id,
+        patientHN: membership.patient_hn,
+        courseId: membership.course_id,
+        remainingSessions: membership.remaining_sessions,
+        purchaseDate: new Date(membership.purchase_date),
+        expiryDate: membership.expiry_date
+          ? new Date(membership.expiry_date)
+          : undefined,
+        createdAt: new Date(membership.created_at),
+        course: membership.courses
+          ? {
+              id: membership.courses.id,
+              name: membership.courses.name,
+              description: membership.courses.description,
+              totalSessions: membership.courses.total_sessions,
+              price: membership.courses.price,
+              createdAt: new Date(membership.courses.created_at),
+            }
+          : undefined,
+      }));
+
+      setMemberships(formattedMemberships);
+    } catch (error) {
+      console.error("Error fetching memberships:", error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,6 +122,35 @@ const TreatmentRecords = ({
 
       if (error) throw error;
 
+      // If a membership was selected, update the remaining sessions and create usage record
+      if (selectedMembershipId) {
+        const membershipId = parseInt(selectedMembershipId);
+        const membership = memberships.find(m => m.id === membershipId);
+        
+        if (membership) {
+          // Update remaining sessions
+          const { error: updateError } = await supabase
+            .from('memberships')
+            .update({ remaining_sessions: membership.remainingSessions - 1 })
+            .eq('id', membershipId);
+
+          if (updateError) throw updateError;
+
+          // Create usage record
+          const { error: usageError } = await supabase
+            .from('membership_usage')
+            .insert({
+              membership_id: membershipId,
+              treatment_id: data.id
+            });
+
+          if (usageError) throw usageError;
+
+          // Refresh memberships
+          await fetchMemberships(currentPatient.hn);
+        }
+      }
+
       const newTreatment: Treatment = {
         id: data.id.toString(),
         patientHN: data.patient_hn,
@@ -96,6 +173,7 @@ const TreatmentRecords = ({
         ...initialFormData,
         patientHN: currentPatient.hn,
       });
+      setSelectedMembershipId("");
 
       onAddTreatment(newTreatment);
 
@@ -116,6 +194,7 @@ const TreatmentRecords = ({
   const handlePatientSelect = async (patient: Patient) => {
     setCurrentPatient(patient);
     setFormData((prev) => ({ ...prev, patientHN: patient.hn }));
+    fetchMemberships(patient.hn);
 
     try {
       const { data: treatmentData, error } = await supabase
@@ -168,6 +247,32 @@ const TreatmentRecords = ({
   return (
     <Card>
       <CardContent className="pt-6">
+        {currentPatient && memberships.length > 0 && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">
+              เลือกคอร์สที่ต้องการใช้
+            </label>
+            <Select
+              value={selectedMembershipId}
+              onValueChange={setSelectedMembershipId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="เลือกคอร์ส (ไม่บังคับ)" />
+              </SelectTrigger>
+              <SelectContent>
+                {memberships.map((membership) => (
+                  <SelectItem
+                    key={membership.id}
+                    value={membership.id.toString()}
+                  >
+                    {membership.course?.name} - เหลือ {membership.remainingSessions} ครั้ง
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+
         <TreatmentForm
           formData={formData}
           setFormData={setFormData}
