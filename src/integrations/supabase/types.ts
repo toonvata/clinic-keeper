@@ -123,18 +123,21 @@ export type Database = {
           membership_id: number | null
           treatment_id: number | null
           used_at: string | null
+          visit_date: string | null
         }
         Insert: {
           id?: number
           membership_id?: number | null
           treatment_id?: number | null
           used_at?: string | null
+          visit_date?: string | null
         }
         Update: {
           id?: number
           membership_id?: number | null
           treatment_id?: number | null
           used_at?: string | null
+          visit_date?: string | null
         }
         Relationships: [
           {

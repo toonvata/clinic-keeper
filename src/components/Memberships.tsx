@@ -28,6 +28,7 @@ import { Course, Membership, Patient } from "@/types";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
+import { MembershipDetails } from "./membership/MembershipDetails";
 
 interface MembershipsProps {
   patients: Patient[];
@@ -224,6 +225,7 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
               <TableHead>จำนวนครั้งคงเหลือ</TableHead>
               <TableHead>วันที่ซื้อ</TableHead>
               <TableHead>วันหมดอายุ</TableHead>
+              <TableHead></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -243,11 +245,17 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
                       })
                     : "-"}
                 </TableCell>
+                <TableCell>
+                  <MembershipDetails 
+                    membership={membership}
+                    onUpdate={() => fetchMemberships(selectedPatient.hn)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
             {memberships.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
+                <TableCell colSpan={5} className="text-center">
                   ไม่มีคอร์สที่ซื้อ
                 </TableCell>
               </TableRow>
