@@ -6,6 +6,16 @@ import { TreatmentFormData, initialFormData } from "@/types/treatment";
 import { supabase } from "@/integrations/supabase/client";
 import { TreatmentForm } from "./treatment/TreatmentForm";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -33,6 +43,8 @@ const TreatmentRecords = ({
   const [formData, setFormData] = useState<TreatmentFormData>(initialFormData);
   const [memberships, setMemberships] = useState<Membership[]>([]);
   const [selectedMembershipId, setSelectedMembershipId] = useState<string>("");
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [treatmentToConfirm, setTreatmentToConfirm] = useState<Treatment | null>(null);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -101,21 +113,41 @@ const TreatmentRecords = ({
       return;
     }
 
+    const newTreatment: Treatment = {
+      id: "",
+      patientHN: formData.patientHN,
+      treatmentDate: formData.treatmentDate,
+      vitalSigns: formData.vitalSigns,
+      symptoms: formData.symptoms,
+      diagnosis: formData.diagnosis,
+      treatment: formData.treatment,
+      medications: formData.medications,
+      doctorId: selectedDoctorId,
+      treatmentImages: formData.treatmentImages
+    };
+
+    setTreatmentToConfirm(newTreatment);
+    setShowConfirmDialog(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    if (!treatmentToConfirm) return;
+
     try {
       const { data, error } = await supabase
         .from('treatments')
         .insert({
-          patient_hn: formData.patientHN,
-          treatment_date: formData.treatmentDate.toISOString(),
-          blood_pressure: formData.vitalSigns.bloodPressure,
-          heart_rate: formData.vitalSigns.heartRate,
-          temperature: formData.vitalSigns.temperature,
-          respiratory_rate: formData.vitalSigns.respiratoryRate,
-          symptoms: formData.symptoms,
-          diagnosis: formData.diagnosis,
-          treatment: formData.treatment,
-          medications: formData.medications,
-          doctor_id: selectedDoctorId
+          patient_hn: treatmentToConfirm.patientHN,
+          treatment_date: treatmentToConfirm.treatmentDate.toISOString(),
+          blood_pressure: treatmentToConfirm.vitalSigns.bloodPressure,
+          heart_rate: treatmentToConfirm.vitalSigns.heartRate,
+          temperature: treatmentToConfirm.vitalSigns.temperature,
+          respiratory_rate: treatmentToConfirm.vitalSigns.respiratoryRate,
+          symptoms: treatmentToConfirm.symptoms,
+          diagnosis: treatmentToConfirm.diagnosis,
+          treatment: treatmentToConfirm.treatment,
+          medications: treatmentToConfirm.medications,
+          doctor_id: treatmentToConfirm.doctorId
         })
         .select()
         .single();
@@ -174,6 +206,7 @@ const TreatmentRecords = ({
         patientHN: currentPatient.hn,
       });
       setSelectedMembershipId("");
+      setShowConfirmDialog(false);
 
       onAddTreatment(newTreatment);
 
@@ -245,49 +278,81 @@ const TreatmentRecords = ({
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        {currentPatient && memberships.length > 0 && (
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">
-              เลือกคอร์สที่ต้องการใช้
-            </label>
-            <Select
-              value={selectedMembershipId}
-              onValueChange={setSelectedMembershipId}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="เลือกคอร์ส (ไม่บังคับ)" />
-              </SelectTrigger>
-              <SelectContent>
-                {memberships.map((membership) => (
-                  <SelectItem
-                    key={membership.id}
-                    value={membership.id.toString()}
-                  >
-                    {membership.course?.name} - เหลือ {membership.remainingSessions} ครั้ง
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
+    <>
+      <Card>
+        <CardContent className="pt-6">
+          {currentPatient && memberships.length > 0 && (
+            <div className="mb-6">
+              <label className="block text-sm font-medium mb-2">
+                เลือกคอร์สที่ต้องการใช้
+              </label>
+              <Select
+                value={selectedMembershipId}
+                onValueChange={setSelectedMembershipId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="เลือกคอร์ส (ไม่บังคับ)" />
+                </SelectTrigger>
+                <SelectContent>
+                  {memberships.map((membership) => (
+                    <SelectItem
+                      key={membership.id}
+                      value={membership.id.toString()}
+                    >
+                      {membership.course?.name} - เหลือ {membership.remainingSessions} ครั้ง
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
-        <TreatmentForm
-          formData={formData}
-          setFormData={setFormData}
-          showSearch={showSearch}
-          setShowSearch={setShowSearch}
-          currentPatient={currentPatient}
-          patients={patients}
-          selectedDoctorId={selectedDoctorId}
-          setSelectedDoctorId={setSelectedDoctorId}
-          onPatientSelect={handlePatientSelect}
-          onImageUploaded={handleImageUploaded}
-          onSubmit={handleSubmit}
-        />
-      </CardContent>
-    </Card>
+          <TreatmentForm
+            formData={formData}
+            setFormData={setFormData}
+            showSearch={showSearch}
+            setShowSearch={setShowSearch}
+            currentPatient={currentPatient}
+            patients={patients}
+            selectedDoctorId={selectedDoctorId}
+            setSelectedDoctorId={setSelectedDoctorId}
+            onPatientSelect={handlePatientSelect}
+            onImageUploaded={handleImageUploaded}
+            onSubmit={handleSubmit}
+          />
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ยืนยันการบันทึกข้อมูลการรักษา</AlertDialogTitle>
+            <AlertDialogDescription>
+              <div className="space-y-2">
+                <p><strong>ผู้ป่วย:</strong> {currentPatient?.firstName} {currentPatient?.lastName}</p>
+                <p><strong>HN:</strong> {treatmentToConfirm?.patientHN}</p>
+                <p><strong>วันที่รักษา:</strong> {treatmentToConfirm?.treatmentDate.toLocaleDateString()}</p>
+                <p><strong>ความดัน:</strong> {treatmentToConfirm?.vitalSigns.bloodPressure}</p>
+                <p><strong>ชีพจร:</strong> {treatmentToConfirm?.vitalSigns.heartRate}</p>
+                <p><strong>อุณหภูมิ:</strong> {treatmentToConfirm?.vitalSigns.temperature}</p>
+                <p><strong>อัตราการหายใจ:</strong> {treatmentToConfirm?.vitalSigns.respiratoryRate}</p>
+                <p><strong>อาการ:</strong> {treatmentToConfirm?.symptoms}</p>
+                <p><strong>การวินิจฉัย:</strong> {treatmentToConfirm?.diagnosis}</p>
+                <p><strong>การรักษา:</strong> {treatmentToConfirm?.treatment}</p>
+                <p><strong>ยาที่ได้รับ:</strong> {treatmentToConfirm?.medications}</p>
+                {selectedMembershipId && (
+                  <p><strong>ใช้คอร์ส:</strong> {memberships.find(m => m.id === parseInt(selectedMembershipId))?.course?.name}</p>
+                )}
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmSubmit}>ยืนยัน</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
