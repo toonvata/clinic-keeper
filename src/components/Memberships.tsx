@@ -130,13 +130,15 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
       const course = courses.find((c) => c.id === parseInt(selectedCourseId));
       if (!course) throw new Error("Course not found");
 
+      // Create expiry date one year from now
+      const expiryDate = new Date();
+      expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+
       const { error } = await supabase.from("memberships").insert({
         patient_hn: selectedPatient.hn,
         course_id: course.id,
         remaining_sessions: course.totalSessions,
-        expiry_date: new Date(
-          new Date().setFullYear(new Date().getFullYear() + 1)
-        ),
+        expiry_date: expiryDate.toISOString(), // Convert Date to ISO string
       });
 
       if (error) throw error;
