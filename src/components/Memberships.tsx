@@ -185,7 +185,7 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
             <DialogTrigger asChild>
               <Button>ซื้อคอร์สใหม่</Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-[500px]">
               <DialogHeader>
                 <DialogTitle>ซื้อคอร์สใหม่</DialogTitle>
               </DialogHeader>
@@ -203,8 +203,12 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
                         <SelectItem
                           key={course.id}
                           value={course.id.toString()}
+                          className="flex flex-col items-start py-2"
                         >
-                          {course.name} - {course.totalSessions} ครั้ง - {course.price} บาท
+                          <div className="font-medium">{course.name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {course.totalSessions} ครั้ง - {course.price.toLocaleString()} บาท
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -231,7 +235,14 @@ const Memberships = ({ patients, selectedPatient }: MembershipsProps) => {
           <TableBody>
             {memberships.map((membership) => (
               <TableRow key={membership.id}>
-                <TableCell>{membership.course?.name}</TableCell>
+                <TableCell>
+                  <div>
+                    <div className="font-medium">{membership.course?.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {membership.course?.price.toLocaleString()} บาท
+                    </div>
+                  </div>
+                </TableCell>
                 <TableCell>{membership.remainingSessions} ครั้ง</TableCell>
                 <TableCell>
                   {format(membership.purchaseDate, "d MMMM yyyy", {
