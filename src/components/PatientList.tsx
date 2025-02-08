@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -43,7 +44,8 @@ const PatientList = ({
     return (
       patient.hn.toLowerCase().includes(searchLower) ||
       patient.firstName.toLowerCase().includes(searchLower) ||
-      patient.lastName.toLowerCase().includes(searchLower)
+      patient.lastName.toLowerCase().includes(searchLower) ||
+      patient.phoneNumber.includes(searchTerm) // Added phone number search
     );
   });
 
@@ -99,7 +101,7 @@ const PatientList = ({
         <div className="relative mb-6">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="ค้นหาด้วย HN หรือชื่อผู้ป่วย..."
+            placeholder="ค้นหาด้วย HN, ชื่อผู้ป่วย หรือเบอร์โทรศัพท์..."
             className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
