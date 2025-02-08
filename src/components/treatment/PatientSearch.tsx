@@ -1,3 +1,4 @@
+
 import { Patient } from "@/types";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,7 +33,8 @@ export const PatientSearch = ({
       (p) =>
         p.hn === value ||
         p.firstName.toLowerCase().includes(value.toLowerCase()) ||
-        p.lastName.toLowerCase().includes(value.toLowerCase())
+        p.lastName.toLowerCase().includes(value.toLowerCase()) ||
+        p.phoneNumber.includes(value) // Added phone number search
     );
 
     if (patient) {
@@ -46,7 +48,7 @@ export const PatientSearch = ({
       <div className="relative">
         <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="พิมพ์ HN หรือชื่อผู้ป่วย..."
+          placeholder="พิมพ์ HN, ชื่อผู้ป่วย หรือเบอร์โทรศัพท์..."
           className="pl-8"
           onClick={() => setShowSearch(true)}
           value={
@@ -60,7 +62,7 @@ export const PatientSearch = ({
 
       {showSearch && (
         <CommandDialog open={showSearch} onOpenChange={setShowSearch}>
-          <CommandInput placeholder="ค้นหาด้วย HN หรือชื่อ..." />
+          <CommandInput placeholder="ค้นหาด้วย HN, ชื่อ หรือเบอร์โทรศัพท์..." />
           <CommandList>
             <CommandEmpty>ไม่พบข้อมูลผู้ป่วย</CommandEmpty>
             <CommandGroup heading="ผู้ป่วย">
@@ -69,7 +71,7 @@ export const PatientSearch = ({
                   key={patient.hn}
                   onSelect={() => handleSearch(patient.hn)}
                 >
-                  {patient.hn} - {patient.firstName} {patient.lastName}
+                  {patient.hn} - {patient.firstName} {patient.lastName} ({patient.phoneNumber})
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -96,6 +98,10 @@ export const PatientSearch = ({
               <div>
                 <span className="font-medium">ประวัติแพ้ยา:</span>{" "}
                 {selectedPatient.drugAllergies || "-"}
+              </div>
+              <div>
+                <span className="font-medium">เบอร์โทรศัพท์:</span>{" "}
+                {selectedPatient.phoneNumber}
               </div>
             </div>
           </div>
