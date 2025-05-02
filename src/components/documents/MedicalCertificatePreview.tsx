@@ -1,3 +1,4 @@
+
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 
@@ -28,6 +29,7 @@ const MedicalCertificatePreview = ({
         <h1 className="text-2xl font-bold">ใบรับรองแพทย์</h1>
         <h2 className="text-xl">Medical Certificate</h2>
         <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
+        <p>เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
         <p>162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
         <p>โทร. 0909149946</p>
       </div>

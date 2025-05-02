@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { jsPDF } from "https://esm.sh/jspdf@2.5.1"
 import { format } from "https://esm.sh/date-fns@2.30.0"
@@ -38,18 +39,19 @@ serve(async (req) => {
     
     doc.setFontSize(12);
     doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 40, { align: 'center' });
-    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 45, { align: 'center' });
-    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
+    doc.text('เลขที่ใบอนุญาตประกอบกิจการ 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
+    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 55, { align: 'center' });
+    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 60, { align: 'center' });
 
     // Receipt details
     const margin = 20;
-    doc.text(`เลขที่ / No: ${receiptData.receiptNumber}`, doc.internal.pageSize.width - margin - 50, 70);
-    doc.text(`วันที่ / Date: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, margin, 70);
-    doc.text(`ได้รับเงินจาก / Received from: ${receiptData.patientName}`, margin, 80);
+    doc.text(`เลขที่ / No: ${receiptData.receiptNumber}`, doc.internal.pageSize.width - margin - 50, 75);
+    doc.text(`วันที่ / Date: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, margin, 75);
+    doc.text(`ได้รับเงินจาก / Received from: ${receiptData.patientName}`, margin, 85);
 
     // Table header
-    const startY = 90;
+    const startY = 95;
     doc.line(margin, startY, doc.internal.pageSize.width - margin, startY);
     doc.text('รายการ / Description', margin, startY + 7);
     doc.text('จำนวนเงิน / Amount', doc.internal.pageSize.width - margin - 40, startY + 7);
