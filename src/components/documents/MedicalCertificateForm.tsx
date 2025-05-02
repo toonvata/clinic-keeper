@@ -13,7 +13,7 @@ import { CalendarIcon, FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import PreviewDialog from "./PreviewDialog";
-import MedicalCertificatePreview from "./MedicalCertificatePreview";
+import MedicalCertificatePreview, { generateMedicalCertificatePDF } from "./MedicalCertificatePreview";
 
 interface MedicalCertificateFormProps {
   patient: Patient;
@@ -110,42 +110,17 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         restDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       }
 
-      // Generate certificate number
-      const certificateNumber = `MC-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`;
-
-      const certificateData = {
+      // Generate PDF using browser-side jsPDF
+      const pdfData = generateMedicalCertificatePDF({
         certificateNumber,
-        patientName: `${patient.firstName} ${patient.lastName}`,
         doctorName,
-        visitDate: visitDate.toISOString(),
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString(),
-        restDays,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        visitDate,
+        startDate,
+        endDate,
+        restDays: restDays > 0 ? restDays : undefined,
         diagnosis
-      };
-
-      console.log('Sending certificate data:', certificateData);
-
-      const { data, error } = await supabase.functions.invoke('generate-medical-certificate', {
-        body: { certificateData }
       });
-
-      if (error) {
-        console.error('Error from edge function:', error);
-        throw error;
-      }
-
-      if (!data?.pdf) {
-        throw new Error('No PDF data received from the server');
-      }
-
-      console.log('Received PDF data from server');
-
-      // Create object URL from base64 PDF
-      const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-
-      console.log('Created PDF URL:', pdfUrl);
 
       // Save certificate data to database
       const { error: insertError } = await supabase
@@ -157,9 +132,8 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
           visit_date: visitDate.toISOString(),
           start_date: startDate?.toISOString(),
           end_date: endDate?.toISOString(),
-          rest_days: restDays,
-          diagnosis,
-          pdf_url: pdfUrl
+          rest_days: restDays > 0 ? restDays : null,
+          diagnosis
         });
 
       if (insertError) {
@@ -168,12 +142,18 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       }
 
       // Open PDF in new tab
-      window.open(pdfUrl, '_blank');
+      window.open(pdfData, '_blank');
 
       toast({
         title: "พิมพ์เอกสารสำเร็จ",
         description: "ระบบได้สร้างไฟล์ PDF เรียบร้อยแล้ว",
       });
+      
+      // Reset form and get new certificate number
+      fetchLatestCertificateNumber();
+      setDiagnosis("");
+      setStartDate(undefined);
+      setEndDate(undefined);
     } catch (error) {
       console.error('Error generating certificate:', error);
       toast({
@@ -309,7 +289,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         title="ตัวอย่างใบรับรองแพทย์"
       >
         <MedicalCertificatePreview
-          certificateNumber={`MC-${new Date().getFullYear()}-XXXX`}
+          certificateNumber={certificateNumber}
           doctorName={doctorName}
           patientName={`${patient.firstName} ${patient.lastName}`}
           visitDate={visitDate}

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { FileText, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import PreviewDialog from "./PreviewDialog";
-import ReceiptPreview from "./ReceiptPreview";
+import ReceiptPreview, { generateReceiptPDF } from "./ReceiptPreview";
 import ReceiptFormInputs from "./receipt/ReceiptFormInputs";
 import ReceiptDatePicker from "./receipt/ReceiptDatePicker";
 
@@ -105,46 +106,30 @@ const ReceiptForm = ({ patient }: ReceiptFormProps) => {
 
       if (insertError) throw insertError;
 
-      // Generate PDF using edge function
-      const { data, error } = await supabase.functions.invoke("generate-receipt", {
-        body: {
-          receiptData: {
-            receiptNumber,
-            patientName: `${patient.firstName} ${patient.lastName}`,
-            date: date.toISOString(),
-            items: [
-              {
-                description: "ค่าบริการทางการแพทย์",
-                amount: parseFloat(medicalServiceAmount || "0"),
-              },
-              {
-                description: "ค่าหัตถการเพื่อการรักษา",
-                amount: parseFloat(procedureAmount || "0"),
-              },
-              {
-                description: "ค่ายาและเวชภัณฑ์",
-                amount: parseFloat(medicationAmount || "0"),
-              },
-            ],
-            totalAmount: getTotalAmount(),
+      // Generate PDF using browser-side jsPDF
+      const pdfData = generateReceiptPDF({
+        receiptNumber,
+        patientName: `${patient.firstName} ${patient.lastName}`,
+        date,
+        items: [
+          {
+            description: "ค่าบริการทางการแพทย์",
+            amount: parseFloat(medicalServiceAmount || "0"),
           },
-        },
+          {
+            description: "ค่าหัตถการเพื่อการรักษา",
+            amount: parseFloat(procedureAmount || "0"),
+          },
+          {
+            description: "ค่ายาและเวชภัณฑ์",
+            amount: parseFloat(medicationAmount || "0"),
+          },
+        ],
+        totalAmount: getTotalAmount(),
       });
 
-      if (error) throw error;
-
-      if (!data?.pdf) {
-        throw new Error("No PDF data received from the server");
-      }
-
-      // Create object URL from base64 PDF
-      const pdfBlob = await fetch(
-        `data:application/pdf;base64,${data.pdf}`
-      ).then((res) => res.blob());
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-
       // Open PDF in new tab
-      window.open(pdfUrl, "_blank");
+      window.open(pdfData, "_blank");
 
       toast({
         title: "พิมพ์เอกสารสำเร็จ",
