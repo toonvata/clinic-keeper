@@ -27,44 +27,54 @@ serve(async (req) => {
       floatPrecision: 16
     });
 
-    // Add embedded Thai font
-    doc.addFont('THSarabunNew', 'THSarabunNew', 'normal');
-    doc.setFont('THSarabunNew');
+    // Setup for better encoding support
+    doc.setLanguage("th");
+    doc.setFont('helvetica');
+    doc.setFontSize(12);
 
-    console.log('Created PDF document with Thai font support');
+    console.log('Created PDF document with font support');
 
-    // Header
+    // Header - Use English for better compatibility
     doc.setFontSize(20);
-    doc.text('ใบเสร็จรับเงิน / RECEIPT', doc.internal.pageSize.width / 2, 30, { align: 'center' });
+    doc.text('RECEIPT', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.setFont('THSarabunNew', 'bold');
-    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 40, { align: 'center' });
-    doc.setFont('THSarabunNew', 'normal');
-    doc.text('เลขที่ใบอนุญาตประกอบกิจการ 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
-    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 55, { align: 'center' });
-    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 60, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text('License No. 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
+    doc.text('162 Suan Somdet Road, Mueang, Chachoengsao', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('Tel. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
 
     // Receipt details
     const margin = 20;
-    doc.text(`เลขที่ / No: ${receiptData.receiptNumber}`, doc.internal.pageSize.width - margin - 50, 75);
-    doc.text(`วันที่ / Date: ${format(new Date(receiptData.date), 'd MMMM yyyy', { locale: th })}`, margin, 75);
-    doc.text(`ได้รับเงินจาก / Received from: ${receiptData.patientName}`, margin, 85);
+    doc.text(`No: ${receiptData.receiptNumber}`, doc.internal.pageSize.width - margin - 50, 75);
+    doc.text(`Date: ${format(new Date(receiptData.date), 'd MMMM yyyy')}`, margin, 75);
+    doc.text(`Received from: ${receiptData.patientName}`, margin, 85);
 
     // Table header
     const startY = 95;
     doc.line(margin, startY, doc.internal.pageSize.width - margin, startY);
-    doc.text('รายการ / Description', margin, startY + 7);
-    doc.text('จำนวนเงิน / Amount', doc.internal.pageSize.width - margin - 40, startY + 7);
+    doc.text('Description', margin, startY + 7);
+    doc.text('Amount', doc.internal.pageSize.width - margin - 40, startY + 7);
     doc.line(margin, startY + 10, doc.internal.pageSize.width - margin, startY + 10);
 
     // Table content
     let currentY = startY + 20;
     receiptData.items.forEach((item) => {
       if (item.amount > 0) {
-        doc.text(item.description, margin, currentY);
-        doc.text(`${item.amount.toLocaleString('th-TH')} บาท`, doc.internal.pageSize.width - margin - 40, currentY, { align: 'right' });
+        // For descriptions, use English equivalents
+        let description = item.description;
+        if (item.description === "ค่าบริการทางการแพทย์") {
+          description = "Medical Service Fee";
+        } else if (item.description === "ค่าหัตถการเพื่อการรักษา") {
+          description = "Treatment Procedure Fee";
+        } else if (item.description === "ค่ายาและเวชภัณฑ์") {
+          description = "Medication and Medical Supplies";
+        }
+        
+        doc.text(description, margin, currentY);
+        doc.text(`${item.amount.toLocaleString()} THB`, doc.internal.pageSize.width - margin - 40, currentY, { align: 'right' });
         currentY += 10;
       }
     });
@@ -73,7 +83,7 @@ serve(async (req) => {
     const totalBoxY = currentY + 10;
     doc.rect(margin, totalBoxY, doc.internal.pageSize.width - (2 * margin), 20);
     doc.text(
-      `จำนวนเงินรวมทั้งสิ้น / Total Amount: ${receiptData.totalAmount.toLocaleString('th-TH')} บาท`, 
+      `Total Amount: ${receiptData.totalAmount.toLocaleString()} THB`, 
       doc.internal.pageSize.width / 2, 
       totalBoxY + 13, 
       { align: 'center' }
@@ -81,9 +91,9 @@ serve(async (req) => {
 
     // Signature section
     const signatureY = totalBoxY + 50;
-    doc.text('ผู้รับเงิน / Received by ............................................', doc.internal.pageSize.width - margin - 70, signatureY);
+    doc.text('Received by ............................................', doc.internal.pageSize.width - margin - 70, signatureY);
     doc.text(
-      `วันที่ / Date ${format(new Date(), 'd MMMM yyyy', { locale: th })}`,
+      `Date ${format(new Date(), 'd MMMM yyyy')}`,
       doc.internal.pageSize.width - margin - 70,
       signatureY + 10
     );

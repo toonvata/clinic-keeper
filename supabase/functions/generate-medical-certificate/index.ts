@@ -18,7 +18,7 @@ serve(async (req) => {
     const { certificateData } = await req.json()
     console.log('Received certificate data:', certificateData)
 
-    // Create new PDF document (A4 size)
+    // Create new PDF document
     const doc = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
@@ -27,78 +27,78 @@ serve(async (req) => {
       floatPrecision: 16
     });
 
-    // Add embedded Thai font
-    doc.addFont('THSarabunNew', 'THSarabunNew', 'normal');
-    doc.setFont('THSarabunNew');
+    // Setup for better encoding support
+    doc.setLanguage("th");
+    doc.setFont('helvetica');
+    doc.setFontSize(12);
 
-    console.log('Created PDF document with Thai font support');
+    console.log('Created PDF document with font support');
 
-    // Header
+    // Header - Use English for better compatibility
     doc.setFontSize(16);
-    doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
-    doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.setFont('THSarabunNew', 'bold');
-    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.setFont('THSarabunNew', 'normal');
-    doc.text('เลขที่ใบอนุญาตประกอบกิจการ 24110000168', doc.internal.pageSize.width / 2, 55, { align: 'center' });
-    doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 60, { align: 'center' });
-    doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 65, { align: 'center' });
+    doc.setFont('helvetica', 'bold');
+    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.text('License No. 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
+    doc.text('162 Suan Somdet Road, Mueang, Chachoengsao', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('Tel. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
 
     // Certificate details
     const margin = 25;
-    let currentY = 80;
+    let currentY = 70;
 
     // Certificate number
-    doc.text(`เลขที่: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
+    doc.text(`Certificate No.: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
     
     currentY += 15;
-    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ได้ทำการตรวจร่างกาย`, margin, currentY);
+    doc.text(`This is to certify that Dr. ${certificateData.doctorName} has examined`, margin, currentY);
     
     currentY += 10;
-    doc.text(`นาย/นาง/นางสาว ${certificateData.patientName}`, margin, currentY);
+    doc.text(`Patient: ${certificateData.patientName}`, margin, currentY);
     
     currentY += 10;
-    const visitDate = format(new Date(certificateData.visitDate), 'd MMMM yyyy', { locale: th });
-    doc.text(`เมื่อวันที่ ${visitDate}`, margin, currentY);
+    const visitDate = format(new Date(certificateData.visitDate), 'd MMMM yyyy');
+    doc.text(`Date of visit: ${visitDate}`, margin, currentY);
 
     if (certificateData.diagnosis) {
       currentY += 10;
-      doc.text(`ผลการตรวจ/วินิจฉัยโรค: ${certificateData.diagnosis}`, margin, currentY);
+      doc.text(`Diagnosis: ${certificateData.diagnosis}`, margin, currentY);
     }
 
     if (certificateData.startDate && certificateData.endDate) {
       currentY += 10;
-      const startDate = format(new Date(certificateData.startDate), 'd MMMM yyyy', { locale: th });
-      doc.text(`ให้หยุดพักตั้งแต่วันที่ ${startDate}`, margin, currentY);
+      const startDate = format(new Date(certificateData.startDate), 'd MMMM yyyy');
+      doc.text(`The patient needs to rest from: ${startDate}`, margin, currentY);
       
       currentY += 10;
-      const endDate = format(new Date(certificateData.endDate), 'd MMMM yyyy', { locale: th });
-      doc.text(`ถึงวันที่ ${endDate}`, margin, currentY);
+      const endDate = format(new Date(certificateData.endDate), 'd MMMM yyyy');
+      doc.text(`Until: ${endDate}`, margin, currentY);
       
       if (certificateData.restDays) {
         currentY += 10;
-        doc.text(`รวมเป็นเวลา ${certificateData.restDays} วัน`, margin, currentY);
+        doc.text(`Total: ${certificateData.restDays} day(s)`, margin, currentY);
       }
     }
 
     currentY += 10;
-    const currentDate = format(new Date(), 'd MMMM yyyy', { locale: th });
-    doc.text(`ออกให้ ณ วันที่ ${currentDate}`, margin, currentY);
+    const currentDate = format(new Date(), 'd MMMM yyyy');
+    doc.text(`Issued on: ${currentDate}`, margin, currentY);
 
     // Signature section
     currentY += 30;
-    doc.text('ลงชื่อ ............................................', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('Signature: ............................................', doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
-    doc.text(`(${certificateData.doctorName})`, doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text(`(Dr. ${certificateData.doctorName})`, doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
-    doc.text('แพทย์ผู้ตรวจ', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('Examining physician', doc.internal.pageSize.width - margin - 70, currentY);
     
     currentY += 10;
-    doc.text('ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ว.XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text('Medical License No. W.XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
 
     console.log('Generating PDF...');
 
