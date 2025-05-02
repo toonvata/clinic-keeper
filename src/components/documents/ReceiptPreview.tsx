@@ -26,9 +26,9 @@ const ReceiptPreview = ({
   return (
     <div className="p-8 bg-white min-h-[29.7cm] w-[21cm] mx-auto">
       <div className="text-center space-y-2 mb-8">
-        <h1 className="text-2xl font-bold">ใบเสร็จรับเงิน / Receipt</h1>
-        <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
+        <h1 className="text-2xl font-bold">ใบเสร็จรับเงิน / RECEIPT</h1>
         <p>เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
+        <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
         <p>House of Herb Wellness Clinic</p>
         <p>162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
         <p>โทร. 0909149946</p>

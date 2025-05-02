@@ -27,9 +27,9 @@ const MedicalCertificatePreview = ({
     <div className="p-8 bg-white">
       <div className="text-center space-y-2 mb-8">
         <h1 className="text-2xl font-bold">ใบรับรองแพทย์</h1>
-        <h2 className="text-xl">Medical Certificate</h2>
-        <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
+        <h2 className="text-xl">MEDICAL CERTIFICATE</h2>
         <p>เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
+        <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
         <p>162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
         <p>โทร. 0909149946</p>
       </div>

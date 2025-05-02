@@ -36,11 +36,11 @@ serve(async (req) => {
     // Header
     doc.setFontSize(16);
     doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
-    doc.text('Medical Certificate', doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 40, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('เลขที่ใบอนุญาตประกอบกิจการ 24110000168', doc.internal.pageSize.width / 2, 55, { align: 'center' });
+    doc.text('เลขที่ใบอนุญาตประกอบกิจการ 24110000168', doc.internal.pageSize.width / 2, 50, { align: 'center' });
+    doc.text('เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก', doc.internal.pageSize.width / 2, 55, { align: 'center' });
     doc.text('162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา', doc.internal.pageSize.width / 2, 60, { align: 'center' });
     doc.text('โทร. 0909149946', doc.internal.pageSize.width / 2, 65, { align: 'center' });
 
