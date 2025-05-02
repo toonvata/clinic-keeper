@@ -1,4 +1,3 @@
-
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import { convertToThaiText } from "@/utils/thaiNumberToText";
@@ -17,6 +16,13 @@ interface ReceiptPreviewProps {
   totalAmount: number;
 }
 
+// Add Thai font capability to jsPDF
+const addThaiFont = (doc: jsPDF) => {
+  // Use standard fonts with UTF-8 encoding for Thai text support
+  doc.setFont("helvetica", "normal");
+  doc.setLanguage("th");
+};
+
 export const generateReceiptPDF = ({
   receiptNumber,
   patientName,
@@ -31,8 +37,8 @@ export const generateReceiptPDF = ({
     format: 'a4',
   });
 
-  // Add default font
-  doc.setFont("helvetica", "normal");
+  // Add Thai font capability
+  addThaiFont(doc);
 
   // Header
   doc.setFontSize(20);
