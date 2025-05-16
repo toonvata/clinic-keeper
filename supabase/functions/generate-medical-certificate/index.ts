@@ -46,8 +46,8 @@ serve(async (req) => {
     const margin = 20;
     let currentY = 50;
 
-    // Doctor information
-    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381`, margin, currentY);
+    // Doctor information with license number
+    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ ${certificateData.doctorLicenseNumber || "พทป.2381"}`, margin, currentY);
     currentY += 10;
     doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
     currentY += 10;

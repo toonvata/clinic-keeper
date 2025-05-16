@@ -28,6 +28,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   const [diagnosis, setDiagnosis] = useState("");
   const [showPreview, setShowPreview] = useState(false);
   const [doctorName, setDoctorName] = useState("");
+  const [doctorLicenseNumber, setDoctorLicenseNumber] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [certificateNumber, setCertificateNumber] = useState("");
 
@@ -68,14 +69,17 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
     try {
       const { data, error } = await supabase
         .from('doctors')
-        .select('name')
+        .select('name, license_number')
         .eq('id', id)
         .single();
       
       if (error) throw error;
-      if (data) setDoctorName(data.name);
+      if (data) {
+        setDoctorName(data.name);
+        setDoctorLicenseNumber(data.license_number || "พทป.2381"); // Use fetched license or default if not available
+      }
     } catch (error) {
-      console.error('Error fetching doctor name:', error);
+      console.error('Error fetching doctor info:', error);
     }
   };
 
@@ -116,6 +120,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
           certificateData: {
             certificateNumber,
             doctorName,
+            doctorLicenseNumber, // Add license number to the payload
             patientName: `${patient.firstName} ${patient.lastName}`,
             visitDate: visitDate.toISOString(),
             startDate: startDate?.toISOString(),
@@ -305,6 +310,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         <MedicalCertificatePreview
           certificateNumber={certificateNumber}
           doctorName={doctorName}
+          doctorLicenseNumber={doctorLicenseNumber}
           patientName={`${patient.firstName} ${patient.lastName}`}
           visitDate={visitDate}
           startDate={startDate}

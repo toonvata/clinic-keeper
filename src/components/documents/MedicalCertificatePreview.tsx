@@ -6,6 +6,7 @@ import { jsPDF } from "jspdf";
 interface MedicalCertificatePreviewProps {
   certificateNumber: string;
   doctorName: string;
+  doctorLicenseNumber: string;
   patientName: string;
   visitDate: Date;
   startDate?: Date;
@@ -28,6 +29,7 @@ const addThaiFont = (doc: jsPDF) => {
 export const generateMedicalCertificatePDF = ({
   certificateNumber,
   doctorName,
+  doctorLicenseNumber,
   patientName,
   visitDate,
   startDate,
@@ -62,8 +64,8 @@ export const generateMedicalCertificatePDF = ({
   const margin = 20;
   let currentY = 50;
 
-  // Doctor information
-  doc.text(`ข้าพเจ้า ${doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381`, margin, currentY);
+  // Doctor information with license number
+  doc.text(`ข้าพเจ้า ${doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ ${doctorLicenseNumber}`, margin, currentY);
   currentY += 10;
   doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
   currentY += 10;
@@ -143,6 +145,7 @@ export const generateMedicalCertificatePDF = ({
 const MedicalCertificatePreview = ({
   certificateNumber,
   doctorName,
+  doctorLicenseNumber,
   patientName,
   visitDate,
   startDate,
@@ -162,7 +165,7 @@ const MedicalCertificatePreview = ({
       </div>
 
       <div className="space-y-1">
-        <p>ข้าพเจ้า {doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381</p>
+        <p>ข้าพเจ้า {doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ {doctorLicenseNumber}</p>
         <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
         <p>ที่อยู่ 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร.0909149946</p>
         <p className="mt-4">หนังสือรับรองฉบับนี้ขอรับรองว่า</p>
