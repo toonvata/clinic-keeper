@@ -34,89 +34,83 @@ serve(async (req) => {
 
     console.log('Created PDF document with font support');
 
-    // Header - Use English for better compatibility
+    // Header
     doc.setFontSize(16);
-    doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 30, { align: 'center' });
+    doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 20, { align: 'center' });
+    doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
     
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 40, { align: 'center' });
-    doc.setFont('helvetica', 'normal');
-    doc.text('License No. 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
-    doc.text('162 Suan Somdet Road, Mueang, Chachoengsao', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-    doc.text('Tel. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
-
-    // Certificate details
-    const margin = 25;
-    let currentY = 70;
-
     // Certificate number
-    doc.text(`Certificate No.: ${certificateData.certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
+    doc.text(`เลขที่ ${certificateData.certificateNumber}`, doc.internal.pageSize.width / 2, 40, { align: 'center' });
+    
+    const margin = 20;
+    let currentY = 50;
+
+    // Doctor information
+    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381`, margin, currentY);
+    currentY += 10;
+    doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
+    currentY += 10;
+    doc.text(`ที่อยู่ 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร.0909149946`, margin, currentY);
     
     currentY += 15;
-    doc.text(`This is to certify that Dr. ${certificateData.doctorName} has examined`, margin, currentY);
-    
+    doc.text(`หนังสือรับรองฉบับนี้ขอรับรองว่า`, margin, currentY);
     currentY += 10;
-    doc.text(`Patient: ${certificateData.patientName}`, margin, currentY);
+    doc.text(`ข้าพเจ้าได้ทำการตรวจร่างกาย บุคคลดังต่อไปนี้`, margin, currentY);
+
+    // Patient information
+    currentY += 10;
+    doc.text(`ชื่อ-นามสกุล ${certificateData.patientName}`, margin, currentY);
     
-    // Add patient age if available
     if (certificateData.patientAge) {
-      currentY += 10;
-      doc.text(`Age: ${certificateData.patientAge} years`, margin, currentY);
+      doc.text(`อายุ ${certificateData.patientAge} ปี`, doc.internal.pageSize.width - margin - 40, currentY);
     }
     
-    // Add ID number if available
     if (certificateData.patientIdNumber) {
       currentY += 10;
-      doc.text(`ID Number: ${certificateData.patientIdNumber}`, margin, currentY);
+      doc.text(`บัตรประจำตัวประชาชน ${certificateData.patientIdNumber}`, margin, currentY);
     }
     
-    // Add address if available
     if (certificateData.patientAddress) {
       currentY += 10;
-      doc.text(`Address: ${certificateData.patientAddress}`, margin, currentY);
+      doc.text(`ที่อยู่ ${certificateData.patientAddress}`, margin, currentY);
     }
+    
+    currentY += 10;
+    doc.text(`ณ สถานที่ตรวจ เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา`, margin, currentY);
     
     currentY += 10;
     const visitDate = format(new Date(certificateData.visitDate), 'd MMMM yyyy');
-    doc.text(`Date of visit: ${visitDate}`, margin, currentY);
+    doc.text(`เมื่อวันที่ ${visitDate}`, margin, currentY);
+    
+    currentY += 15;
+    doc.text(`จากการตรวจร่างกายของผู้มีรายชื่อดังกล่าวข้างต้น ขอให้ความเห็นดังต่อไปนี้`, margin, currentY);
 
+    // Diagnosis
     if (certificateData.diagnosis) {
       currentY += 10;
-      doc.text(`Diagnosis: ${certificateData.diagnosis}`, margin, currentY);
-    }
-
-    if (certificateData.startDate && certificateData.endDate) {
-      currentY += 10;
-      const startDate = format(new Date(certificateData.startDate), 'd MMMM yyyy');
-      doc.text(`The patient needs to rest from: ${startDate}`, margin, currentY);
-      
-      currentY += 10;
-      const endDate = format(new Date(certificateData.endDate), 'd MMMM yyyy');
-      doc.text(`Until: ${endDate}`, margin, currentY);
-      
-      if (certificateData.restDays) {
-        currentY += 10;
-        doc.text(`Total: ${certificateData.restDays} day(s)`, margin, currentY);
-      }
+      doc.text(`ผลการตรวจ / วินิจฉัยโรค ${certificateData.diagnosis}`, margin, currentY);
     }
 
     currentY += 10;
+    doc.text(`สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง`, margin, currentY);
+
     const currentDate = format(new Date(), 'd MMMM yyyy');
-    doc.text(`Issued on: ${currentDate}`, margin, currentY);
+    currentY += 10;
+    doc.text(`ใบรับรองแพทย์นี้ออกให้ ณ วันที่ ${currentDate}`, margin, currentY);
+    
+    currentY += 10;
+    doc.text(`ขอรับรองว่าข้อความข้างต้นเป็นความจริง`, margin, currentY);
 
-    // Signature section
+    // Signatures
     currentY += 30;
-    doc.text('Signature: ............................................', doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text(`ลงชื่อ ............................................แพทย์ผู้ตรวจ`, doc.internal.pageSize.width - margin - 100, currentY);
     
     currentY += 10;
-    doc.text(`(Dr. ${certificateData.doctorName})`, doc.internal.pageSize.width - margin - 70, currentY);
+    doc.text(`${certificateData.doctorName}`, doc.internal.pageSize.width - margin - 80, currentY);
     
-    currentY += 10;
-    doc.text('Examining physician', doc.internal.pageSize.width - margin - 70, currentY);
-    
-    currentY += 10;
-    doc.text('Medical License No. W.XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
+    currentY += 30;
+    doc.text(`ลงชื่อ ............................................ผู้มารับการตรวจ`, margin, currentY);
 
     console.log('Generating PDF...');
 

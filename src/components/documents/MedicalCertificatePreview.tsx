@@ -52,84 +52,81 @@ export const generateMedicalCertificatePDF = ({
 
   // Header
   doc.setFontSize(16);
-  doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 30, { align: 'center' });
+  doc.text('MEDICAL CERTIFICATE', doc.internal.pageSize.width / 2, 20, { align: 'center' });
+  doc.text('ใบรับรองแพทย์', doc.internal.pageSize.width / 2, 30, { align: 'center' });
   
   doc.setFontSize(12);
-  doc.setFont("helvetica", "bold");
-  doc.text('House of Herb Wellness Clinic', doc.internal.pageSize.width / 2, 40, { align: 'center' });
-  doc.setFont("helvetica", "normal");
-  doc.text('License No. 24110000168', doc.internal.pageSize.width / 2, 45, { align: 'center' });
-  doc.text('162 Suan Somdet Road, Mueang, Chachoengsao', doc.internal.pageSize.width / 2, 50, { align: 'center' });
-  doc.text('Tel. 0909149946', doc.internal.pageSize.width / 2, 55, { align: 'center' });
-
-  // Certificate details
-  const margin = 25;
-  let currentY = 65;
-
   // Certificate number
-  doc.text(`Certificate No.: ${certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
+  doc.text(`เลขที่ ${certificateNumber}`, doc.internal.pageSize.width / 2, 40, { align: 'center' });
+  
+  const margin = 20;
+  let currentY = 50;
+
+  // Doctor information
+  doc.text(`ข้าพเจ้า ${doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381`, margin, currentY);
+  currentY += 10;
+  doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
+  currentY += 10;
+  doc.text(`ที่อยู่ 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร.0909149946`, margin, currentY);
   
   currentY += 15;
-  doc.text(`This is to certify that Dr. ${doctorName} has examined`, margin, currentY);
-  
+  doc.text(`หนังสือรับรองฉบับนี้ขอรับรองว่า`, margin, currentY);
   currentY += 10;
-  doc.text(`Patient: ${patientName}`, margin, currentY);
+  doc.text(`ข้าพเจ้าได้ทำการตรวจร่างกาย บุคคลดังต่อไปนี้`, margin, currentY);
+
+  // Patient information
+  currentY += 10;
+  doc.text(`ชื่อ-นามสกุล ${patientName}`, margin, currentY);
   
   if (patientAge) {
-    currentY += 10;
-    doc.text(`Age: ${patientAge} years`, margin, currentY);
+    doc.text(`อายุ ${patientAge} ปี`, doc.internal.pageSize.width - margin - 40, currentY);
   }
   
   if (patientIdNumber) {
     currentY += 10;
-    doc.text(`ID Number: ${patientIdNumber}`, margin, currentY);
+    doc.text(`บัตรประจำตัวประชาชน ${patientIdNumber}`, margin, currentY);
   }
   
   if (patientAddress) {
     currentY += 10;
-    doc.text(`Address: ${patientAddress}`, margin, currentY);
+    doc.text(`ที่อยู่ ${patientAddress}`, margin, currentY);
   }
+  
+  currentY += 10;
+  doc.text(`ณ สถานที่ตรวจ เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา`, margin, currentY);
   
   currentY += 10;
   const visitDateStr = format(visitDate, 'd MMMM yyyy');
-  doc.text(`Date of visit: ${visitDateStr}`, margin, currentY);
+  doc.text(`เมื่อวันที่ ${visitDateStr}`, margin, currentY);
+  
+  currentY += 15;
+  doc.text(`จากการตรวจร่างกายของผู้มีรายชื่อดังกล่าวข้างต้น ขอให้ความเห็นดังต่อไปนี้`, margin, currentY);
 
+  // Diagnosis
   if (diagnosis) {
     currentY += 10;
-    doc.text(`Diagnosis: ${diagnosis}`, margin, currentY);
-  }
-
-  if (startDate && endDate) {
-    currentY += 10;
-    const startDateStr = format(startDate, 'd MMMM yyyy');
-    doc.text(`The patient needs to rest from: ${startDateStr}`, margin, currentY);
-    
-    currentY += 10;
-    const endDateStr = format(endDate, 'd MMMM yyyy');
-    doc.text(`Until: ${endDateStr}`, margin, currentY);
-    
-    if (restDays) {
-      currentY += 10;
-      doc.text(`Total: ${restDays} day(s)`, margin, currentY);
-    }
+    doc.text(`ผลการตรวจ / วินิจฉัยโรค ${diagnosis}`, margin, currentY);
   }
 
   currentY += 10;
+  doc.text(`สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง`, margin, currentY);
+
   const currentDateStr = format(new Date(), 'd MMMM yyyy');
-  doc.text(`Issued on: ${currentDateStr}`, margin, currentY);
+  currentY += 10;
+  doc.text(`ใบรับรองแพทย์นี้ออกให้ ณ วันที่ ${currentDateStr}`, margin, currentY);
+  
+  currentY += 10;
+  doc.text(`ขอรับรองว่าข้อความข้างต้นเป็นความจริง`, margin, currentY);
 
-  // Signature section
+  // Signatures
   currentY += 30;
-  doc.text('Signature: ............................................', doc.internal.pageSize.width - margin - 70, currentY);
+  doc.text(`ลงชื่อ ............................................แพทย์ผู้ตรวจ`, doc.internal.pageSize.width - margin - 100, currentY);
   
   currentY += 10;
-  doc.text(`(Dr. ${doctorName})`, doc.internal.pageSize.width - margin - 70, currentY);
+  doc.text(`${doctorName}`, doc.internal.pageSize.width - margin - 80, currentY);
   
-  currentY += 10;
-  doc.text('Examining physician', doc.internal.pageSize.width - margin - 70, currentY);
-  
-  currentY += 10;
-  doc.text('Medical License No. W.XXXXX', doc.internal.pageSize.width - margin - 70, currentY);
+  currentY += 30;
+  doc.text(`ลงชื่อ ............................................ผู้มารับการตรวจ`, margin, currentY);
 
   // Return the PDF data as base64
   return doc.output('datauristring');
@@ -153,49 +150,44 @@ const MedicalCertificatePreview = ({
       <div className="text-center space-y-2 mb-8">
         <h1 className="text-2xl font-bold">ใบรับรองแพทย์</h1>
         <h2 className="text-xl">MEDICAL CERTIFICATE</h2>
-        <p className="font-bold">เฮ้าส์ ออฟ เฮิร์บ เวลเนส คลินิก</p>
-        <p>เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
-        <p>162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
-        <p>โทร. 0909149946</p>
+        <p>เลขที่: {certificateNumber}</p>
       </div>
 
-      <div className="space-y-4">
-        <div className="text-right">
-          <p>เลขที่: {certificateNumber}</p>
+      <div className="space-y-1">
+        <p>ข้าพเจ้า {doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ พทป.2381</p>
+        <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
+        <p>ที่อยู่ 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร.0909149946</p>
+        <p className="mt-4">หนังสือรับรองฉบับนี้ขอรับรองว่า</p>
+        <p>ข้าพเจ้าได้ทำการตรวจร่างกาย บุคคลดังต่อไปนี้</p>
+        <div className="flex">
+          <p className="flex-1">ชื่อ-นามสกุล {patientName}</p>
+          {patientAge && <p>อายุ {patientAge} ปี</p>}
         </div>
-        <p>ข้าพเจ้า {doctorName} ได้ทำการตรวจร่างกาย</p>
-        <p>นาย/นาง/นางสาว {patientName}</p>
-        {patientAge && <p>อายุ {patientAge} ปี</p>}
         {patientIdNumber && <p>บัตรประจำตัวประชาชน {patientIdNumber}</p>}
         {patientAddress && <p>ที่อยู่ {patientAddress}</p>}
+        <p>ณ สถานที่ตรวจ เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา</p>
         <p>
           เมื่อวันที่{" "}
           {format(visitDate, "d MMMM yyyy", { locale: th })}
         </p>
-        {diagnosis && <p>ผลการตรวจ/วินิจฉัยโรค: {diagnosis}</p>}
-        {startDate && endDate && (
-          <>
-            <p>
-              ให้หยุดพักตั้งแต่วันที่{" "}
-              {format(startDate, "d MMMM yyyy", { locale: th })}
-            </p>
-            <p>
-              ถึงวันที่ {format(endDate, "d MMMM yyyy", { locale: th })}
-            </p>
-            {restDays && <p>รวมเป็นเวลา {restDays} วัน</p>}
-          </>
-        )}
+
+        <p className="mt-4">จากการตรวจร่างกายของผู้มีรายชื่อดังกล่าวข้างต้น ขอให้ความเห็นดังต่อไปนี้</p>
+        {diagnosis && <p>ผลการตรวจ / วินิจฉัยโรค: {diagnosis}</p>}
+        <p>สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง</p>
         <p>
-          ออกให้ ณ วันที่{" "}
+          ใบรับรองแพทย์นี้ออกให้ ณ วันที่{" "}
           {format(new Date(), "d MMMM yyyy", { locale: th })}
         </p>
+        <p>ขอรับรองว่าข้อความข้างต้นเป็นความจริง</p>
       </div>
 
-      <div className="text-right mt-16 space-y-2">
-        <p>ลงชื่อ ............................................</p>
-        <p>({doctorName})</p>
-        <p>แพทย์ผู้ตรวจ</p>
-        <p>ใบอนุญาตประกอบวิชาชีพเวชกรรมเลขที่ ว.XXXXX</p>
+      <div className="text-right mt-16 space-y-1">
+        <p>ลงชื่อ ............................................แพทย์ผู้ตรวจ</p>
+        <p className="mr-20">({doctorName})</p>
+      </div>
+
+      <div className="mt-16 space-y-1">
+        <p>ลงชื่อ ............................................ผู้มารับการตรวจ</p>
       </div>
     </div>
   );
