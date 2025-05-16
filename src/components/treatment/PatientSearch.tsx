@@ -92,16 +92,24 @@ export const PatientSearch = ({
                 <span className="font-medium">อายุ:</span> {selectedPatient.age} ปี
               </div>
               <div>
+                <span className="font-medium">เลขบัตรประจำตัวประชาชน:</span>{" "}
+                {selectedPatient.idNumber || "-"}
+              </div>
+              <div>
+                <span className="font-medium">เบอร์โทรศัพท์:</span>{" "}
+                {selectedPatient.phoneNumber}
+              </div>
+              <div className="col-span-2">
+                <span className="font-medium">ที่อยู่:</span>{" "}
+                {selectedPatient.address || "-"}
+              </div>
+              <div>
                 <span className="font-medium">โรคประจำตัว:</span>{" "}
                 {selectedPatient.underlyingDiseases || "-"}
               </div>
               <div>
                 <span className="font-medium">ประวัติแพ้ยา:</span>{" "}
                 {selectedPatient.drugAllergies || "-"}
-              </div>
-              <div>
-                <span className="font-medium">เบอร์โทรศัพท์:</span>{" "}
-                {selectedPatient.phoneNumber}
               </div>
             </div>
           </div>
