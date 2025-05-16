@@ -108,6 +108,14 @@ export const generateMedicalCertificatePDF = ({
     doc.text(`ผลการตรวจ / วินิจฉัยโรค ${diagnosis}`, margin, currentY);
   }
 
+  // Add rest period information
+  if (startDate && endDate && restDays) {
+    currentY += 10;
+    const startDateStr = format(startDate, 'd MMMM yyyy');
+    const endDateStr = format(endDate, 'd MMMM yyyy');
+    doc.text(`วันที่เริ่มหยุดพัก ${startDateStr} ถึงวันที่ ${endDateStr} เป็นเวลา ${restDays} วัน`, margin, currentY);
+  }
+
   currentY += 10;
   doc.text(`สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง`, margin, currentY);
 
@@ -173,6 +181,16 @@ const MedicalCertificatePreview = ({
 
         <p className="mt-4">จากการตรวจร่างกายของผู้มีรายชื่อดังกล่าวข้างต้น ขอให้ความเห็นดังต่อไปนี้</p>
         {diagnosis && <p>ผลการตรวจ / วินิจฉัยโรค: {diagnosis}</p>}
+        
+        {/* Add rest period information */}
+        {startDate && endDate && restDays && (
+          <p>
+            วันที่เริ่มหยุดพัก {format(startDate, "d MMMM yyyy", { locale: th })} 
+            ถึงวันที่ {format(endDate, "d MMMM yyyy", { locale: th })} 
+            เป็นเวลา {restDays} วัน
+          </p>
+        )}
+        
         <p>สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง</p>
         <p>
           ใบรับรองแพทย์นี้ออกให้ ณ วันที่{" "}

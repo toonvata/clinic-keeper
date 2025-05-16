@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -111,20 +110,34 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         restDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1;
       }
 
-      // Generate PDF using browser-side jsPDF
-      const pdfData = generateMedicalCertificatePDF({
-        certificateNumber,
-        doctorName,
-        patientName: `${patient.firstName} ${patient.lastName}`,
-        visitDate,
-        startDate,
-        endDate,
-        restDays: restDays > 0 ? restDays : undefined,
-        diagnosis,
-        patientIdNumber: patient.idNumber,
-        patientAddress: patient.address,
-        patientAge: patient.age
+      // Call Supabase edge function to generate the PDF
+      const { data, error } = await supabase.functions.invoke('generate-medical-certificate', {
+        body: {
+          certificateData: {
+            certificateNumber,
+            doctorName,
+            patientName: `${patient.firstName} ${patient.lastName}`,
+            visitDate: visitDate.toISOString(),
+            startDate: startDate?.toISOString(),
+            endDate: endDate?.toISOString(),
+            restDays: restDays > 0 ? restDays : undefined,
+            diagnosis,
+            patientIdNumber: patient.idNumber,
+            patientAddress: patient.address,
+            patientAge: patient.age
+          }
+        }
       });
+
+      if (error) throw error;
+      
+      if (!data || !data.pdf) {
+        throw new Error('No PDF data received');
+      }
+      
+      // Convert base64 to PDF and open in new tab
+      const pdfData = `data:application/pdf;base64,${data.pdf}`;
+      window.open(pdfData, '_blank');
 
       // Save certificate data to database
       const { error: insertError } = await supabase
@@ -145,12 +158,9 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         throw insertError;
       }
 
-      // Open PDF in new tab
-      window.open(pdfData, '_blank');
-
       toast({
         title: "พิมพ์เอกสารสำเร็จ",
-        description: "ระบบได้สร้างไฟล์ PDF เรียบร้อยแล้ว",
+        description: "ระบบได้สร้างใบรับรองแพทย์เรียบร้อยแล้ว",
       });
       
       // Reset form and get new certificate number

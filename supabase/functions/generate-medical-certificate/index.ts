@@ -92,6 +92,14 @@ serve(async (req) => {
       doc.text(`ผลการตรวจ / วินิจฉัยโรค ${certificateData.diagnosis}`, margin, currentY);
     }
 
+    // Add rest period information
+    if (certificateData.startDate && certificateData.endDate && certificateData.restDays) {
+      currentY += 10;
+      const startDateStr = format(new Date(certificateData.startDate), 'd MMMM yyyy');
+      const endDateStr = format(new Date(certificateData.endDate), 'd MMMM yyyy');
+      doc.text(`วันที่เริ่มหยุดพัก ${startDateStr} ถึงวันที่ ${endDateStr} เป็นเวลา ${certificateData.restDays} วัน`, margin, currentY);
+    }
+
     currentY += 10;
     doc.text(`สรุปความเห็น ได้มาพบแพทย์ทำการรักษาจริง`, margin, currentY);
 
