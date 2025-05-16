@@ -46,9 +46,9 @@ serve(async (req) => {
     const margin = 20;
     let currentY = 50;
 
-    // Doctor information with license number
+    // Doctor information with license number - removed "ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์"
     const licenseNumber = certificateData.doctorLicenseNumber || "พทป.2381";
-    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ ${licenseNumber}`, margin, currentY);
+    doc.text(`ข้าพเจ้า ${certificateData.doctorName} ใบอนุญาตเลขที่ ${licenseNumber}`, margin, currentY);
     currentY += 10;
     doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
     currentY += 10;

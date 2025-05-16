@@ -11,14 +11,15 @@ interface PreviewDialogProps {
   children: React.ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  title?: string;  // Make title optional
 }
 
-const PreviewDialog = ({ children, open, onOpenChange }: PreviewDialogProps) => {
+const PreviewDialog = ({ children, open, onOpenChange, title = "Preview" }: PreviewDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Preview</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="max-h-[80vh] overflow-y-auto">{children}</div>
       </DialogContent>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
@@ -92,47 +91,39 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   
   useEffect(() => {
     const fetchDoctors = async () => {
-      const { data, error } = await supabase
-        .from('doctors')
-        .select('id, name, license_number');
-      
-      if (error) {
-        console.error('Error fetching doctors:', error);
-      } else if (data) {
-        // Merge predefined doctors with any from the database
-        const dbDoctors = data.map(doc => ({
-          id: doc.id.toString(),
-          name: doc.name,
-          license_number: doc.license_number
-        }));
+      try {
+        const { data, error } = await supabase
+          .from('doctors')
+          .select('id, name, license_number');
         
-        // Use Set to ensure unique doctors by ID
-        const uniqueDoctors = [...predefinedDoctors];
-        
-        dbDoctors.forEach(dbDoc => {
-          if (!uniqueDoctors.some(doc => doc.id === dbDoc.id)) {
-            uniqueDoctors.push(dbDoc);
-          }
-        });
-        
-        setDoctors(uniqueDoctors);
+        if (error) {
+          console.error('Error fetching doctors:', error);
+        } else if (data && Array.isArray(data)) {
+          // Merge predefined doctors with any from the database
+          const dbDoctors = data.map(doc => ({
+            id: doc.id.toString(),
+            name: doc.name,
+            license_number: doc.license_number
+          }));
+          
+          // Use Set to ensure unique doctors by ID
+          const uniqueDoctors = [...predefinedDoctors];
+          
+          dbDoctors.forEach(dbDoc => {
+            if (!uniqueDoctors.some(doc => doc.id === dbDoc.id)) {
+              uniqueDoctors.push(dbDoc);
+            }
+          });
+          
+          setDoctors(uniqueDoctors);
+        }
+      } catch (error) {
+        console.error('Exception fetching doctors:', error);
       }
     };
     
     fetchDoctors();
   }, []);
-  
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      certificateNumber: `MC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
-      patientName: `${patient.firstName} ${patient.lastName}`,
-      patientAge: patient.age?.toString() || "",
-      patientIdNumber: patient.idNumber,
-      patientAddress: patient.address,
-      visitDate: new Date(),
-    },
-  });
   
   const handleDoctorChange = (doctorId: string) => {
     const selectedDoctor = doctors.find(doc => doc.id === doctorId);
@@ -173,6 +164,18 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
     setCertificateData(values);
     setOpen(true);
   };
+  
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      certificateNumber: `MC-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+      patientName: `${patient.firstName} ${patient.lastName}`,
+      patientAge: patient.age?.toString() || "",
+      patientIdNumber: patient.idNumber,
+      patientAddress: patient.address,
+      visitDate: new Date(),
+    },
+  });
   
   return (
     <div>

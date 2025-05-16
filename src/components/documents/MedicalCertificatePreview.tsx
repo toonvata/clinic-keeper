@@ -64,8 +64,8 @@ export const generateMedicalCertificatePDF = ({
   const margin = 20;
   let currentY = 50;
 
-  // Doctor information with license number
-  doc.text(`ข้าพเจ้า ${doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ ${doctorLicenseNumber}`, margin, currentY);
+  // Doctor information with license number - removed "ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์"
+  doc.text(`ข้าพเจ้า ${doctorName} ใบอนุญาตเลขที่ ${doctorLicenseNumber}`, margin, currentY);
   currentY += 10;
   doc.text(`เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168`, margin, currentY);
   currentY += 10;
@@ -165,7 +165,8 @@ const MedicalCertificatePreview = ({
       </div>
 
       <div className="space-y-1">
-        <p>ข้าพเจ้า {doctorName} ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์ ใบอนุญาตเลขที่ {doctorLicenseNumber}</p>
+        {/* Removed "ผู้ประกอบวิชาชีพแพทย์แผนไทยประยุกต์" */}
+        <p>ข้าพเจ้า {doctorName} ใบอนุญาตเลขที่ {doctorLicenseNumber}</p>
         <p>เฮ้าส์ ออฟ เฮิร์บ เวลเนส สหคลินิก เลขที่ใบอนุญาตประกอบกิจการ 24110000168</p>
         <p>ที่อยู่ 162 ถนนสวนสมเด็จ ต.หน้าเมือง อ.เมือง จ.ฉะเชิงเทรา โทร.0909149946</p>
         <p className="mt-4">หนังสือรับรองฉบับนี้ขอรับรองว่า</p>
