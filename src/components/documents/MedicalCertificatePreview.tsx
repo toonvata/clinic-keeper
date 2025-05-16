@@ -12,6 +12,9 @@ interface MedicalCertificatePreviewProps {
   endDate?: Date;
   restDays?: number;
   diagnosis: string;
+  patientIdNumber?: string;
+  patientAddress?: string;
+  patientAge?: number;
 }
 
 // Add Thai font capability to jsPDF
@@ -31,6 +34,9 @@ export const generateMedicalCertificatePDF = ({
   endDate,
   restDays,
   diagnosis,
+  patientIdNumber,
+  patientAddress,
+  patientAge,
 }: MedicalCertificatePreviewProps): string => {
   // Create new PDF document
   const doc = new jsPDF({
@@ -58,7 +64,7 @@ export const generateMedicalCertificatePDF = ({
 
   // Certificate details
   const margin = 25;
-  let currentY = 70;
+  let currentY = 65;
 
   // Certificate number
   doc.text(`Certificate No.: ${certificateNumber}`, doc.internal.pageSize.width - margin - 50, currentY);
@@ -68,6 +74,21 @@ export const generateMedicalCertificatePDF = ({
   
   currentY += 10;
   doc.text(`Patient: ${patientName}`, margin, currentY);
+  
+  if (patientAge) {
+    currentY += 10;
+    doc.text(`Age: ${patientAge} years`, margin, currentY);
+  }
+  
+  if (patientIdNumber) {
+    currentY += 10;
+    doc.text(`ID Number: ${patientIdNumber}`, margin, currentY);
+  }
+  
+  if (patientAddress) {
+    currentY += 10;
+    doc.text(`Address: ${patientAddress}`, margin, currentY);
+  }
   
   currentY += 10;
   const visitDateStr = format(visitDate, 'd MMMM yyyy');
@@ -123,6 +144,9 @@ const MedicalCertificatePreview = ({
   endDate,
   restDays,
   diagnosis,
+  patientIdNumber,
+  patientAddress,
+  patientAge,
 }: MedicalCertificatePreviewProps) => {
   return (
     <div className="p-8 bg-white">
@@ -141,6 +165,9 @@ const MedicalCertificatePreview = ({
         </div>
         <p>ข้าพเจ้า {doctorName} ได้ทำการตรวจร่างกาย</p>
         <p>นาย/นาง/นางสาว {patientName}</p>
+        {patientAge && <p>อายุ {patientAge} ปี</p>}
+        {patientIdNumber && <p>บัตรประจำตัวประชาชน {patientIdNumber}</p>}
+        {patientAddress && <p>ที่อยู่ {patientAddress}</p>}
         <p>
           เมื่อวันที่{" "}
           {format(visitDate, "d MMMM yyyy", { locale: th })}

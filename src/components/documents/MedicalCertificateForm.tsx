@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Patient } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -119,7 +120,10 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
         startDate,
         endDate,
         restDays: restDays > 0 ? restDays : undefined,
-        diagnosis
+        diagnosis,
+        patientIdNumber: patient.idNumber,
+        patientAddress: patient.address,
+        patientAge: patient.age
       });
 
       // Save certificate data to database
@@ -301,6 +305,9 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
               : undefined
           }
           diagnosis={diagnosis}
+          patientIdNumber={patient.idNumber}
+          patientAddress={patient.address}
+          patientAge={patient.age}
         />
       </PreviewDialog>
     </div>

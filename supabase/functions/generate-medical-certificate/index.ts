@@ -59,6 +59,24 @@ serve(async (req) => {
     currentY += 10;
     doc.text(`Patient: ${certificateData.patientName}`, margin, currentY);
     
+    // Add patient age if available
+    if (certificateData.patientAge) {
+      currentY += 10;
+      doc.text(`Age: ${certificateData.patientAge} years`, margin, currentY);
+    }
+    
+    // Add ID number if available
+    if (certificateData.patientIdNumber) {
+      currentY += 10;
+      doc.text(`ID Number: ${certificateData.patientIdNumber}`, margin, currentY);
+    }
+    
+    // Add address if available
+    if (certificateData.patientAddress) {
+      currentY += 10;
+      doc.text(`Address: ${certificateData.patientAddress}`, margin, currentY);
+    }
+    
     currentY += 10;
     const visitDate = format(new Date(certificateData.visitDate), 'd MMMM yyyy');
     doc.text(`Date of visit: ${visitDate}`, margin, currentY);
