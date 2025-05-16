@@ -64,9 +64,30 @@ interface MedicalCertificateFormProps {
   patient: Patient;
 }
 
+// Define the doctor type
+interface Doctor {
+  id: string;
+  name: string;
+  license_number?: string;
+}
+
+// Predefined doctors
+const predefinedDoctors: Doctor[] = [
+  { 
+    id: "1", 
+    name: "นาย วาตา โสดา", 
+    license_number: "พทป.2381" 
+  },
+  { 
+    id: "2", 
+    name: "นายแพทย์ นิรัตน์พงษ์ เชาวนิช", 
+    license_number: "ว......" 
+  }
+];
+
 const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
-  const [doctors, setDoctors] = useState<{id: string, name: string, license_number?: string}[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [doctors, setDoctors] = useState<Doctor[]>(predefinedDoctors);
+  const [open, setOpen] = useState(false);
   const [certificateData, setCertificateData] = useState<FormValues | null>(null);
   
   useEffect(() => {
@@ -78,7 +99,23 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       if (error) {
         console.error('Error fetching doctors:', error);
       } else if (data) {
-        setDoctors(data);
+        // Merge predefined doctors with any from the database
+        const dbDoctors = data.map(doc => ({
+          id: doc.id.toString(),
+          name: doc.name,
+          license_number: doc.license_number
+        }));
+        
+        // Use Set to ensure unique doctors by ID
+        const uniqueDoctors = [...predefinedDoctors];
+        
+        dbDoctors.forEach(dbDoc => {
+          if (!uniqueDoctors.some(doc => doc.id === dbDoc.id)) {
+            uniqueDoctors.push(dbDoc);
+          }
+        });
+        
+        setDoctors(uniqueDoctors);
       }
     };
     
@@ -134,7 +171,7 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
   
   const handleSubmit = (values: FormValues) => {
     setCertificateData(values);
-    setIsDialogOpen(true);
+    setOpen(true);
   };
   
   return (
@@ -348,11 +385,24 @@ const MedicalCertificateForm = ({ patient }: MedicalCertificateFormProps) => {
       </Form>
 
       <PreviewDialog 
-        isOpen={isDialogOpen} 
-        onClose={() => setIsDialogOpen(false)}
+        open={open} 
+        onOpenChange={setOpen}
       >
         {certificateData && (
-          <MedicalCertificatePreview certificateData={certificateData} />
+          <MedicalCertificatePreview 
+            certificateNumber={certificateData.certificateNumber}
+            doctorName={certificateData.doctorName}
+            doctorLicenseNumber={certificateData.doctorLicenseNumber || "พทป.2381"}
+            patientName={certificateData.patientName}
+            patientAge={certificateData.patientAge ? parseInt(certificateData.patientAge) : undefined}
+            patientIdNumber={certificateData.patientIdNumber}
+            patientAddress={certificateData.patientAddress}
+            visitDate={certificateData.visitDate}
+            startDate={certificateData.startDate}
+            endDate={certificateData.endDate}
+            restDays={certificateData.restDays ? parseInt(certificateData.restDays) : undefined}
+            diagnosis={certificateData.diagnosis || ""}
+          />
         )}
       </PreviewDialog>
     </div>

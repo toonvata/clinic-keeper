@@ -1,3 +1,5 @@
+
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,20 +8,19 @@ import {
 } from "@/components/ui/dialog";
 
 interface PreviewDialogProps {
+  children: React.ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title: string;
-  children: React.ReactNode;
 }
 
-const PreviewDialog = ({ open, onOpenChange, title, children }: PreviewDialogProps) => {
+const PreviewDialog = ({ children, open, onOpenChange }: PreviewDialogProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle>Preview</DialogTitle>
         </DialogHeader>
-        <div className="mt-4">{children}</div>
+        <div className="max-h-[80vh] overflow-y-auto">{children}</div>
       </DialogContent>
     </Dialog>
   );
